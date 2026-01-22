@@ -11,7 +11,7 @@ from app.core.database import Base
 
 # Import all models so Alembic can discover metadata
 # Add new model imports here as your project grows
-from app.models import example  # noqa
+from app.models import example, user, project, chat_session, chat_message, generated_image
 
 settings = get_settings()
 
@@ -28,7 +28,7 @@ if config.config_file_name is not None:
 # Set target metadata
 target_metadata = Base.metadata
 
-
+print("ALEMBIC DATABASE URL =", config.get_main_option("sqlalchemy.url"))
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
     url = config.get_main_option("sqlalchemy.url")

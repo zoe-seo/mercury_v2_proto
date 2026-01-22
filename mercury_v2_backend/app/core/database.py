@@ -18,7 +18,11 @@ AsyncSessionLocal = async_sessionmaker(
     expire_on_commit=False,
 )
 
+# Alias for Celery tasks compatibility
+async_session_maker = AsyncSessionLocal
+
 
 class Base(DeclarativeBase):
     """Base class for all SQLAlchemy models."""
     pass
+

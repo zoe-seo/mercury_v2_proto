@@ -21,6 +21,23 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
     
+    # MinIO (S3-compatible storage)
+    MINIO_ENDPOINT: str = "localhost:9000"
+    MINIO_ACCESS_KEY: str = "minioadmin"
+    MINIO_SECRET_KEY: str = "minioadmin"
+    MINIO_BUCKET_NAME: str = "mercury-v2"
+    MINIO_USE_SSL: bool = False
+    
+    # Redis (Celery broker)
+    REDIS_URL: str = "redis://localhost:6379/0"
+    
+    # Google AI (Gemini for image generation)
+    GOOGLE_API_KEY: str = "your-google-api-key-here"
+    
+    # OpenAI (for chat and market reports)
+    OPENAI_API_KEY: str = "your-openai-api-key-here"
+    OPENAI_MODEL: str = "gpt-4-turbo-preview"
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

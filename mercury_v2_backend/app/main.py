@@ -18,7 +18,7 @@ setup_middleware(app)
 
 # Include routers
 app.include_router(health.router)
-app.include_router(v1_router)
+app.include_router(v1_router, prefix="/api")
 
 
 @app.get("/")
