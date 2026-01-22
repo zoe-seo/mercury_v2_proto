@@ -6,7 +6,12 @@ description: Define service requirements and user stories
 
 1. **Master Document Management (Project Overview)**:
    - 프로젝트 시작 시 `docs/service-summary.md`를 생성하거나 업데이트합니다.
-   - 이 문서에는 서비스의 핵심 목적, 타겟 사용자, 전체 페이지 맵(Site Map), 핵심 비즈니스 로직의 요약을 포함합니다.
+   - 작성할 때는 반드시 사용자의 허락을 구하거나, 사용자의 의견을 취합하여 작성합니다
+   - 이 문서에는 다음 내용을 반드시 포함해야 합니다:
+     - **서비스 핵심 목적 및 타겟 사용자**
+     - **사이트 맵(Site Map)**: 전체 페이지 구조와 이동 경로
+     - **[신규] 글로벌 레이아웃 정의**: 모든 화면에 공통 적용될 뼈대(예: Header, Sidebar, Footer, Utility Bar 등)의 존재 여부와 역할
+     - **핵심 비즈니스 로직 요약**
    - 모든 개별 기능 명세는 이 요약 문서의 범주 안에서 정합성을 유지해야 합니다.
 
 2. **Information Gathering & Discovery**:
