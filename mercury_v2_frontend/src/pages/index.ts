@@ -1,4 +1,8 @@
 export { Home } from './Home'
 export { PageA } from './PageA'
 export { PageB } from './PageB'
+export { ChatPage } from './ChatPage'
+export { CanvasPage } from './CanvasPage'
+export { LoginPage } from './auth/LoginPage'
+export { SignupPage } from './auth/SignupPage'
 export { NotFound } from './NotFound'

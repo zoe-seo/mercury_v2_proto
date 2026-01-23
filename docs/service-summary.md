@@ -29,9 +29,9 @@
 - **기능**: AI 챗봇과의 대화를 통한 디자인 생성
 - **워크플로우**:
   1. **Requirement Gathering**: AI가 브랜드 아이덴티티, 타겟 오디언스, 스타일 등을 질문하며 수집
-  2. **Outline Selection**: AI가 여러 스케치 윤곽선을 제안하고 사용자가 선택
-  3. **Image Generation**: 선택된 윤곽선과 프롬프트로 고품질 렌더링 생성
-  4. **Design Package**: 최종 디자인 + 마케팅 리포트 생성
+  2. **Outline Selection**: AI가 여러 신발 이미지(아웃라인용)을 제안하고 사용자가 선택
+  3. **Image Generation**: 선택된 아웃라인과 프롬프트로 고품질 렌더링 생성
+  4. **Design Package**: 기본 정보 + 최종 디자인 + 마케팅 리포트 생성
 - **특징**:
   - 스트리밍 응답 (SSE)
   - 세션 자동 저장 및 재개
@@ -46,10 +46,12 @@
   - **Drawing Tools**: 브러시, 도형, 색상 피커
   - **AI Integration**: 스케치 → 렌더링 변환 (Sketch-to-Image)
   - **Inpainting**: 특정 영역만 마스킹하여 부분 수정
+  - **Text Prompting**: 생성된 이미지에 프롬프팅하여 2차, 3차 이미지 생성
   - **Layering**: 레이어 관리 (원본 스케치 / 생성 이미지 분리)
 - **특징**:
   - Undo/Redo (프론트엔드 메모리 관리)
   - 키보드 단축키 지원
+  - 내보내기 지원 (이미지 포함된 디자인 패키지)
   - Floating AI Panel (선택 객체에 대한 텍스트 프롬프트)
 - **상세**: [req-003-sketch-to-design.md](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/requirements/req-003-sketch-to-design.md)
 

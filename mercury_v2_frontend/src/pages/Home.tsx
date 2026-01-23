@@ -1,39 +1,26 @@
-export function Home() {
+import { motion } from 'framer-motion';
+import { Layout } from '../components/layout/Layout';
+import HeroSection from '../components/home/HeroSection';
+import RecentProjectsSection from '../components/home/RecentProjectsSection';
+import GalleryHighlightsSection from '../components/home/GalleryHighlightsSection';
+import QuickStatsSection from '../components/home/QuickStatsSection';
+
+export const Home = () => {
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold mb-6">Welcome to Mercury V2</h1>
-      <p className="text-lg text-muted-foreground mb-8">
-        This is a production-ready React + Vite application with TypeScript, Zustand, TanStack
-        Query, and Tailwind CSS.
-      </p>
+    <Layout>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
+        className="min-h-[calc(100vh-64px)]"
+      >
+        <HeroSection />
+        <RecentProjectsSection />
+        <GalleryHighlightsSection />
+        <QuickStatsSection />
+      </motion.div>
+    </Layout>
+  );
+};
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="p-6 border rounded-lg bg-card">
-          <h2 className="text-2xl font-semibold mb-3">Page A</h2>
-          <p className="text-muted-foreground mb-4">
-            Demonstrates TanStack Query for server state management with resource CRUD operations.
-          </p>
-          <a
-            href="/page-a"
-            className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-          >
-            View Page A
-          </a>
-        </div>
-
-        <div className="p-6 border rounded-lg bg-card">
-          <h2 className="text-2xl font-semibold mb-3">Page B</h2>
-          <p className="text-muted-foreground mb-4">
-            Demonstrates Zustand for client-side state management with an editor example.
-          </p>
-          <a
-            href="/page-b"
-            className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-          >
-            View Page B
-          </a>
-        </div>
-      </div>
-    </div>
-  )
-}
