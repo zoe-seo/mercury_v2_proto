@@ -25,6 +25,14 @@
 - **보안**: JWT Access Token (24시간 만료)
 - **상세**: [req-001-auth.md](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/requirements/req-001-auth.md)
 
+### 2.5 User Profile (사용자 프로필)
+- **기능**: 사용자 정보 및 환경 설정 관리
+- **범위**: 
+  - 기본 정보 (이름, 바이오, 직책)
+  - 프로필 이미지 (Avatar)
+  - 환경 설정 (선호 신발 사이즈 단위 등)
+- **상세**: [req-005-user-profile.md](file:///c:/Users/bytesize/Desktop/mercury_v2/docs/requirements/req-005-user-profile.md)
+
 ### 2.2 Text to Design (채팅 기반 디자인 생성)
 - **기능**: AI 챗봇과의 대화를 통한 디자인 생성
 - **워크플로우**:
@@ -289,6 +297,7 @@ finalize_report (최종 리포트 조합)
 - [REQ-002: Text to Design](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/requirements/req-002-text-to-design.md)
 - [REQ-003: Sketch to Design](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/requirements/req-003-sketch-to-design.md)
 - [REQ-004: Gallery & Export](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/requirements/req-004-gallery-export.md)
+- [REQ-005: User Profile](file:///c:/Users/bytesize/Desktop/mercury_v2/docs/requirements/req-005-user-profile.md)
 - [Architecture Decisions](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/design/architecture-decisions.md)
 - [API Specification](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/design/api-spec.md)
 - [Database Schema](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/design/schema.md)

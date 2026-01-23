@@ -35,6 +35,12 @@ erDiagram
         string email UK
         string password_hash
         string name
+        string nickname
+        string job_title
+        text bio
+        string avatar_url
+        jsonb preferences
+        jsonb notification_settings
         timestamp created_at
         timestamp updated_at
         boolean is_active
@@ -161,6 +167,12 @@ MVP 단계에서는 단일 사용자 환경을 가정하지만, 확장성을 고
 | email | VARCHAR(255) | UNIQUE, NOT NULL | 이메일 (로그인 ID) |
 | password_hash | VARCHAR(255) | NOT NULL | 암호화된 비밀번호 |
 | name | VARCHAR(100) | NOT NULL | 사용자 이름 |
+| nickname | VARCHAR(100) | NULL | 디스플레이 이름 (닉네임) |
+| job_title | VARCHAR(100) | NULL | 직책/역할 (예: Product Designer) |
+| bio | TEXT | NULL | 자기소개 (최대 200자) |
+| avatar_url | VARCHAR(500) | NULL | 프로필 이미지 URL |
+| preferences | JSONB | NULL | 디자이너 설정 (shoe_size_system, gender_category, style_tags) |
+| notification_settings | JSONB | NULL | 알림 설정 (email_creation_finished, email_weekly_report, app_browser_notification) |
 | created_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 생성 일시 |
 | updated_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 수정 일시 |
 | is_active | BOOLEAN | NOT NULL, DEFAULT TRUE | 활성 상태 |

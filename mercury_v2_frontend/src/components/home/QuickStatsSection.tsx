@@ -1,4 +1,4 @@
-import { mockStats } from '../../api/mockData';
+import { mockStats } from '@/mocks/data/home';
 
 const QuickStatsSection = () => {
   return (

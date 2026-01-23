@@ -1,4 +1,4 @@
-import type { CreateResourceDto, Resource, UpdateResourceDto } from '@/types/resource.type'
+import type { CreateResourceDto, Resource, UpdateResourceDto } from '@/types/api/resource'
 import apiClient from './axios'
 
 export const resourceApi = {

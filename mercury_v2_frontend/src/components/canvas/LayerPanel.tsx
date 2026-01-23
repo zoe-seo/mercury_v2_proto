@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Layers, Eye, EyeOff, Lock, Unlock, Trash2, Plus } from 'lucide-react';
 import { Button } from '../common/Button';
-import { mockLayers } from '../../api/mockCanvasData';
+import { mockLayers } from '@/mocks/data/canvas';
 import { cn } from '../../utils/cn';
 
 export const LayerPanel = () => {

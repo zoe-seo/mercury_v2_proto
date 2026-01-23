@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { authApi, type LoginRequest, type RegisterRequest } from '../features/auth/api/auth.api';
+import { authApi, type LoginRequest, type RegisterRequest } from '../api/auth.api';
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ export const useAuth = () => {
     mutationFn: (credentials: LoginRequest) => authApi.login(credentials),
     onSuccess: (response) => {
       // 1. Save Token
-      const { access_token } = response.data;
+      const { access_token } = response;
       localStorage.setItem('accessToken', access_token);
       
       // 2. Invalidate/Prefetch calls if needed
@@ -31,7 +31,7 @@ export const useAuth = () => {
     mutationFn: (data: RegisterRequest) => authApi.signup(data),
     onSuccess: (response) => {
       // 1. Save Token (Auto login after signup)
-      const { access_token } = response.data;
+      const { access_token } = response;
       localStorage.setItem('accessToken', access_token);
       
       // 2. Redirect

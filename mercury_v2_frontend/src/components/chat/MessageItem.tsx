@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { cn } from '../../utils/cn';
-import type { Message } from '../../api/mockData';
+import type { Message } from '@/mocks/data/home';
 import { User, Wand2, Download, Palette } from 'lucide-react';
 import { Button } from '../common/Button';
 

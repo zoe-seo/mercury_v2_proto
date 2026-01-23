@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, MessageCircle, Palette, FolderOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { mockProjects } from '../../api/mockData';
+import { mockProjects } from '@/mocks/data/home';
 import { cn } from '../../utils/cn';
 
 const RecentProjectsSection = () => {

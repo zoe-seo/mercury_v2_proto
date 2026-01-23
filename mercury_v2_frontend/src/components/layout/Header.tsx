@@ -25,14 +25,11 @@ export const Header = () => {
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 h-full flex items-center justify-between">
+      <div className="max-w-[1400px] mx-auto px-4 h-full flex items-center justify-between">
         
         {/* Left: Logo */}
         <div className="flex items-center w-[20%]">
           <Link to="/" className="text-2xl font-heading font-bold text-gray-800 flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center text-white">
-              M
-            </div>
             <span>Mercury</span>
           </Link>
         </div>
@@ -73,10 +70,9 @@ export const Header = () => {
           </Button>
           
           <div className="hidden sm:flex items-center gap-3 ml-2 pl-2 border-l border-gray-200">
-             <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold border border-primary-200">
+             <Link to="/mypage" className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold border border-primary-200 hover:ring-2 hover:ring-primary-200 transition-all">
                J
-             </div>
-             {/* Simple Dropdown Trigger (Placeholder) */}
+             </Link>
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -117,7 +113,7 @@ export const Header = () => {
                 </Link>
               ))}
               <div className="h-px bg-gray-100 my-2" />
-              <Link to="/profile" className="px-4 py-3 text-base font-medium text-gray-600 flex items-center gap-2">
+              <Link to="/mypage" className="px-4 py-3 text-base font-medium text-gray-600 flex items-center gap-2">
                 <User size={18} /> Profile
               </Link>
               <Link to="/settings" className="px-4 py-3 text-base font-medium text-gray-600 flex items-center gap-2">

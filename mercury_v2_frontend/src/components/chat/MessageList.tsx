@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import type { Message } from '../../api/mockData';
+import type { Message } from '@/mocks/data/home';
 import { MessageItem } from './MessageItem';
 
 interface MessageListProps {

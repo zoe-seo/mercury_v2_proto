@@ -3,7 +3,7 @@ import { Layout } from '../components/layout/Layout';
 import { ChatLayout } from '../components/chat/ChatLayout';
 import { SessionListPanel } from '../components/chat/SessionListPanel';
 import { ChatArea } from '../components/chat/ChatArea';
-import { mockSessions } from '../api/mockData';
+import { mockSessions } from '@/mocks/data/home';
 
 export const ChatPage = () => {
   const { sessionId } = useParams();

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Home, ChatPage, CanvasPage, LoginPage, SignupPage, PageA, PageB, NotFound } from '@/pages'
+import { Home, ChatPage, CanvasPage, LoginPage, SignupPage, PageA, PageB, NotFound, UserProfilePage } from '@/pages'
 
 export function AppRouter() {
   return (
@@ -14,6 +14,7 @@ export function AppRouter() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/page-a" element={<PageA />} />
         <Route path="/page-b" element={<PageB />} />
+        <Route path="/mypage" element={<UserProfilePage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

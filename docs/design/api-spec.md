@@ -86,7 +86,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ## 3. 인증 (Authentication)
 
-### 3.1 회원가입
+### 3.1 회원가입 `[DONE]`
 
 **POST** `/auth/signup`
 
@@ -117,7 +117,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 3.2 로그인
+### 3.2 로그인 `[DONE]`
 
 **POST** `/auth/login`
 
@@ -146,7 +146,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 3.3 로그아웃
+### 3.3 로그아웃 `[DONE]`
 
 **POST** `/auth/logout`
 
@@ -156,7 +156,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 3.4 사용자 프로필 조회
+### 3.4 사용자 프로필 조회 `[DONE]`
 
 **GET** `/auth/me`
 
@@ -176,7 +176,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 3.5 비밀번호 변경
+### 3.5 비밀번호 변경 `[DONE]`
 
 **PUT** `/auth/password`
 
@@ -186,7 +186,8 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 ```json
 {
   "current_password": "oldPassword123!",
-  "new_password": "newPassword456!"
+  "new_password": "newPassword456!",
+  "confirm_password": "newPassword456!"
 }
 ```
 
@@ -203,7 +204,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ## 4. 프로젝트 (Projects)
 
-### 4.1 프로젝트 목록 조회
+### 4.1 프로젝트 목록 조회 `[DONE]`
 
 **GET** `/projects`
 
@@ -239,7 +240,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 4.2 프로젝트 생성
+### 4.2 프로젝트 생성 `[DONE]`
 
 **POST** `/projects`
 
@@ -268,7 +269,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 4.3 프로젝트 상세 조회
+### 4.3 프로젝트 상세 조회 `[DONE]`
 
 **GET** `/projects/{project_id}`
 
@@ -297,7 +298,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 4.4 프로젝트 수정
+### 4.4 프로젝트 수정 `[DONE]`
 
 **PUT** `/projects/{project_id}`
 
@@ -325,7 +326,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 4.5 프로젝트 삭제
+### 4.5 프로젝트 삭제 `[DONE]`
 
 **DELETE** `/projects/{project_id}`
 
@@ -337,7 +338,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ## 5. 채팅 세션 (Chat Sessions)
 
-### 5.1 채팅 세션 목록 조회
+### 5.1 채팅 세션 목록 조회 `[DONE]`
 
 **GET** `/chat/sessions`
 
@@ -370,7 +371,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 5.2 채팅 세션 생성
+### 5.2 채팅 세션 생성 `[DONE]`
 
 **POST** `/chat/sessions`
 
@@ -400,7 +401,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 5.3 채팅 세션 상세 조회
+### 5.3 채팅 세션 상세 조회 `[DONE]`
 
 **GET** `/chat/sessions/{session_id}`
 
@@ -432,7 +433,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 5.4 채팅 메시지 목록 조회
+### 5.4 채팅 메시지 목록 조회 `[DONE]`
 
 **GET** `/chat/sessions/{session_id}/messages`
 
@@ -469,7 +470,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 5.5 채팅 메시지 전송 (Stream)
+### 5.5 채팅 메시지 전송 (Stream) `[DONE]`
 
 **POST** `/chat/sessions/{session_id}/messages/stream`
 
@@ -510,7 +511,7 @@ data: {}
 
 ---
 
-### 5.6 Outline 이미지 생성 요청
+### 5.6 Outline 이미지 생성 요청 `[DONE]`
 
 **POST** `/chat/sessions/{session_id}/generate-outlines`
 
@@ -538,7 +539,7 @@ data: {}
 
 ---
 
-### 5.7 최종 디자인 생성 요청
+### 5.7 최종 디자인 생성 요청 `[DONE]`
 
 **POST** `/chat/sessions/{session_id}/generate-design`
 
@@ -1175,7 +1176,7 @@ data: {}
 
 AI 이미지 생성 등 비동기 작업의 상태를 조회합니다.
 
-**GET** `/tasks/{task_id}`
+**GET** `/tasks/{task_id}` `[DONE]`
 
 **Headers**: `Authorization: Bearer {token}`
 
@@ -1458,3 +1459,141 @@ def generate_image_task(prompt: str, model: str, params: dict):
   - 디자인 패키지 생성 상태
 - **HTTP/2 필수**: SSE 성능 최적화를 위해 인프라 레벨에서 HTTP/2 활성화
 - **WebSocket 미사용**: MVP에서는 양방향 통신 불필요 (추후 실시간 협업 시 재검토)
+
+---
+
+## 7. 사용자 (Users)
+
+### 7.1 현재 사용자 프로필 조회 `[DONE]`
+
+**GET** `/users/me`
+
+Retrieves the profile information of the currently authenticated user.
+
+**Headers**: `Authorization: Bearer {token}`
+
+**Response** (200):
+```json
+{
+  "data": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "name": "Hong Gil Dong", 
+    "nickname": "GilDong123",
+    "job_title": "Product Designer",
+    "bio": "Designing experiences that matter.",
+    "avatar_url": "https://example.com/avatars/user1.jpg",
+    "stats": {
+      "projects_count": 12
+    },
+    "preferences": {
+        "shoe_size_system": "US", // "US", "UK", "EU", "MM"
+        "gender_category": "mens", // "mens", "womens", "unisex", "kids"
+        "style_tags": ["minimalist", "futuristic"]
+    },
+    "notification_settings": {
+        "email_creation_finished": true,
+        "email_weekly_report": false,
+        "app_browser_notification": true
+    }
+  }
+}
+```
+
+### 7.2 사용자 프로필 수정 (기본 정보) `[DONE]`
+
+**PUT** `/users/me`
+
+Updates general profile info.
+
+**Headers**: `Authorization: Bearer {token}`
+
+**Request Body**
+```json
+{
+  "nickname": "NewNickname",
+  "job_title": "Senior Product Designer",
+  "bio": "Updated bio..."
+}
+```
+
+**Response** (200):
+```json
+{
+  "data": {
+    "message": "Profile updated successfully"
+  }
+}
+```
+
+### 7.3 사용자 설정 수정 (Preferences) `[DONE]`
+
+**PUT** `/users/me/preferences`
+
+Updates designer preferences.
+
+**Headers**: `Authorization: Bearer {token}`
+
+**Request Body**
+```json
+{
+  "shoe_size_system": "EU",
+  "gender_category": "unisex",
+  "style_tags": ["retro", "streetwear"]
+}
+```
+
+**Response** (200):
+```json
+{
+  "data": {
+    "message": "Preferences updated successfully"
+  }
+}
+```
+
+### 7.4 알림 설정 수정 `[DONE]`
+
+**PUT** `/users/me/notifications`
+
+Updates notification settings.
+
+**Headers**: `Authorization: Bearer {token}`
+
+**Request Body**
+```json
+{
+  "email_creation_finished": false,
+  "email_weekly_report": true,
+  "app_browser_notification": false
+}
+```
+
+**Response** (200):
+```json
+{
+  "data": {
+    "message": "Notification settings updated successfully"
+  }
+}
+```
+
+### 7.5 아바타 업로드 `[DONE]`
+
+**POST** `/users/me/avatar`
+
+Uploads a new avatar image.
+
+**Headers**: `Authorization: Bearer {token}`
+
+**Request (Multipart/form-data)**
+- `file`: Binary image data
+
+**Response** (200):
+```json
+{
+  "data": {
+    "avatar_url": "https://example.com/avatars/new-avatar.jpg"
+  }
+}
+```

@@ -1,6 +1,6 @@
 import { Plus, Search, MoreVertical } from 'lucide-react';
 import { Button } from '../common/Button';
-import { mockSessions } from '../../api/mockData';
+import { mockSessions } from '@/mocks/data/home';
 import { Link, useParams } from 'react-router-dom';
 import { cn } from '../../utils/cn';
 

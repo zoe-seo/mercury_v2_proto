@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
-import type { Message } from '../../api/mockData';
+import type { Message } from '@/mocks/data/home';
 
 interface ChatAreaProps {
   initialMessages?: Message[];

@@ -1,18 +1,10 @@
-import apiClient from '../../../api/client';
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  created_at: string;
-}
+import apiClient from './client';
+import type { User } from '@/types/api/user';
 
 export interface AuthResponse {
-  data: {
-    user: User;
-    access_token: string;
-    token_type: string;
-  };
+  user: User;
+  access_token: string;
+  token_type: string;
 }
 
 export interface LoginRequest {

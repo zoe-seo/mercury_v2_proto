@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Image as ImageIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { mockDesigns } from '../../api/mockData';
+import { mockDesigns } from '@/mocks/data/home';
 
 const GalleryHighlightsSection = () => {
   const containerVariants = {

@@ -27,13 +27,14 @@ def ensure_bucket_exists():
         raise
 
 
-def upload_image(image_data: bytes, filename: str | None = None) -> str:
+def upload_image(image_data: bytes, filename: str | None = None, content_type: str = "image/png") -> str:
     """
     Upload image to MinIO.
     
     Args:
         image_data: Image bytes
         filename: Optional filename (will generate UUID if not provided)
+        content_type: MIME type of the image (default: image/png)
     
     Returns:
         Object name (path) in MinIO
@@ -43,7 +44,11 @@ def upload_image(image_data: bytes, filename: str | None = None) -> str:
     if filename is None:
         filename = f"{uuid.uuid4()}.png"
     
-    object_name = f"images/{filename}"
+    # Use filename directly if it already includes a path
+    if '/' in filename:
+        object_name = filename
+    else:
+        object_name = f"images/{filename}"
     
     try:
         minio_client.put_object(
@@ -51,7 +56,7 @@ def upload_image(image_data: bytes, filename: str | None = None) -> str:
             object_name,
             BytesIO(image_data),
             length=len(image_data),
-            content_type="image/png"
+            content_type=content_type
         )
         return object_name
     except S3Error as e:

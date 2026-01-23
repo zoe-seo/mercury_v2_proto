@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { useCanvas } from '../../hooks/useCanvas';
-import { mockLayers } from '../../api/mockCanvasData';
+import { mockLayers } from '@/mocks/data/canvas';
 
 interface CanvasBoardProps {
   logic: ReturnType<typeof useCanvas>;

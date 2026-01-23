@@ -1,5 +1,5 @@
 import { Trash2, Loader2 } from 'lucide-react'
-import type { Resource } from '@/types/resource.type'
+import type { Resource } from '@/types/api/resource'
 import { formatDateTime } from '@/utils/formatDate'
 
 interface ComponentAProps {

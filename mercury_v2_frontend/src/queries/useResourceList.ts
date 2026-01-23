@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { resourceApi } from '@/api/resource.api'
-import type { CreateResourceDto, UpdateResourceDto } from '@/types/resource.type'
+import type { CreateResourceDto, UpdateResourceDto } from '@/types/api/resource'
 
 export const useResourceList = () => {
   return useQuery({
