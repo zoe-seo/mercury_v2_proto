@@ -25,25 +25,13 @@ export const ChatArea = ({
   }, [messages]);
 
   const handleSendMessage = async (content: string) => {
-    // 사용자 메시지를 먼저 로컬 상태에 추가 (즉시 UI 표시)
-    const newMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content,
-      created_at: new Date().toISOString(),
-      sequence_number: localMessages.length + 1,
-    };
-    
-    setLocalMessages((prev) => [...prev, newMessage]);
-
     // 세션이 없으면 첫 메시지로 세션 생성
     if (!sessionId && onFirstMessage) {
       onFirstMessage(content);
       return;
     }
 
-    // 기존 세션에 메시지 추가
-    setIsTyping(true);
+    // 기존 세션에 메시지 추가 (임시 로컬 상태)
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
       role: 'user',
