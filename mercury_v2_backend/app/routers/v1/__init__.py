@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.routers.v1 import example, auth, projects, chat, users, canvas, design_packages, tasks
+from app.routers.v1 import example, auth, projects, chat, users, canvas, design_packages, tasks, gallery
 
 router = APIRouter(prefix="/v1")
 
@@ -11,3 +11,4 @@ router.include_router(users.router)
 router.include_router(canvas.router)
 router.include_router(design_packages.router)
 router.include_router(tasks.router)
+router.include_router(gallery.router)

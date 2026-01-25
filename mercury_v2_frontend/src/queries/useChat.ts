@@ -78,6 +78,7 @@ export const useSendMessage = () => {
         onMessageStart?: (data: { message_id: string; sequence_number: number }) => void;
         onContentDelta?: (data: { delta: string }) => void;
         onMessageComplete?: (data: { message_id: string; content: string }) => void;
+        onBriefRequest?: (data: { message_id: string; brief_data: any; is_required: boolean }) => void;
         onDone?: () => void;
         onError?: (error: Error) => void;
       },
@@ -86,6 +87,7 @@ export const useSendMessage = () => {
       try {
         await chatApi.sendMessageStream(sessionId, content, {
           ...callbacks,
+          onBriefRequest: callbacks.onBriefRequest, // Pass it through
           onDone: () => {
             // 메시지 전송 완료 후 쿼리 무효화
             queryClient.invalidateQueries({ 

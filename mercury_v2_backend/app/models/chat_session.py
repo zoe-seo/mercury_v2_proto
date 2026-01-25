@@ -1,5 +1,5 @@
 from sqlalchemy import String, Text, Boolean, Index, text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from datetime import datetime
 import uuid
@@ -43,3 +43,6 @@ class ChatSession(Base):
         nullable=False
     )
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    # Relationships
+    design_brief = relationship("DesignBrief", back_populates="chat_session", uselist=False)

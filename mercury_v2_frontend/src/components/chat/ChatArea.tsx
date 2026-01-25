@@ -22,6 +22,7 @@ export const ChatArea = ({
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>(messages);
   const [isTyping, setIsTyping] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
+  const [streamingMetadata, setStreamingMetadata] = useState<Record<string, any> | undefined>(undefined);
   const [currentMessageId, setCurrentMessageId] = useState<string | null>(null);
   const hasAutoSentRef = useRef(false);
   
@@ -69,6 +70,7 @@ export const ChatArea = ({
     setLocalMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
     setStreamingContent('');
+    setStreamingMetadata(undefined);
     setCurrentMessageId(null);
 
     // SSE 스트리밍으로 메시지 전송
@@ -80,10 +82,18 @@ export const ChatArea = ({
           console.log('Message started:', data);
           setCurrentMessageId(data.message_id);
           setStreamingContent('');
+          setStreamingMetadata(undefined);
         },
         onContentDelta: (data) => {
           // 스트리밍 중인 내용을 누적
           setStreamingContent((prev) => prev + data.delta);
+        },
+        onBriefRequest: (data) => {
+          console.log('Brief Request received:', data);
+          setStreamingMetadata((prev) => ({
+            ...prev,
+            brief_request: data
+          }));
         },
         onMessageComplete: (data) => {
           console.log('Message completed:', data);
@@ -93,12 +103,14 @@ export const ChatArea = ({
             id: data.message_id,
             role: 'assistant',
             content: data.content,
+            metadata: streamingMetadata, // Use the captured metadata
             created_at: new Date().toISOString(),
             sequence_number: localMessages.length + 2,
           };
           
           setLocalMessages((prev) => [...prev, aiMessage]);
           setStreamingContent('');
+          setStreamingMetadata(undefined);
           setCurrentMessageId(null);
         },
         onDone: () => {
@@ -109,6 +121,7 @@ export const ChatArea = ({
           console.error('Stream error:', error);
           setIsTyping(false);
           setStreamingContent('');
+          setStreamingMetadata(undefined);
           setCurrentMessageId(null);
           
           // 에러 메시지 표시
@@ -178,6 +191,7 @@ export const ChatArea = ({
       id: currentMessageId,
       role: 'assistant',
       content: streamingContent,
+      metadata: streamingMetadata,
       created_at: new Date().toISOString(),
       sequence_number: localMessages.length + 1,
     });
@@ -186,6 +200,8 @@ export const ChatArea = ({
   return (
     <div className="flex flex-col h-full">
       <MessageList messages={displayMessages} isTyping={isTyping && !streamingContent} />
+
+
       <ChatInput 
         onSendMessage={handleSendMessage} 
         disabled={isTyping || isCreatingSession} 

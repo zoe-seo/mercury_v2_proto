@@ -1,8 +1,10 @@
-import { Plus, Search, MoreVertical, Trash2 } from 'lucide-react';
+import { Plus, Search, MoreVertical, Trash2, Settings, X } from 'lucide-react';
 import { Button } from '../common/Button';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { cn } from '../../utils/cn';
 import { useChatSessions, useDeleteChatSession } from '@/queries/useChat';
+import { useChatBrief, useUpsertChatBrief } from '@/queries/useDesignBrief';
+import { DesignBriefForm } from '../common/DesignBrief/DesignBriefForm';
 import { useState, useEffect } from 'react';
 
 export const SessionListPanel = () => {
@@ -11,6 +13,7 @@ export const SessionListPanel = () => {
   const { data: sessionsData, isLoading } = useChatSessions();
   const { mutate: deleteSession } = useDeleteChatSession();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [briefModalSessionId, setBriefModalSessionId] = useState<string | null>(null);
   
   // 디버깅: 세션 데이터 확인
   console.log('SessionListPanel - sessionsData:', sessionsData);
@@ -120,13 +123,28 @@ export const SessionListPanel = () => {
                 
                 {/* Dropdown Menu */}
                 {openMenuId === session.id && (
-                  <div className="absolute right-2 top-12 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[120px]">
+                  <div 
+                    className="absolute right-2 top-12 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[120px]"
+                    onClick={(e) => e.stopPropagation()} // Stop propagation from menu clicks
+                  >
                     <button
                       onClick={(e) => handleDelete(session.id, e)}
                       className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                     >
                       <Trash2 size={14} />
                       Delete
+                    </button>
+                    <button
+                      onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setBriefModalSessionId(session.id); // Open Brief Modal
+                          setOpenMenuId(null); // Close Dropdown
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-t border-gray-100"
+                    >
+                      <Settings size={14} />
+                      Brief Settings
                     </button>
                   </div>
                 )}
@@ -135,6 +153,64 @@ export const SessionListPanel = () => {
           })
         )}
       </div>
+
+      {/* Brief Settings Modal */}
+      {briefModalSessionId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+             {/* Backdrop */}
+             <div 
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={() => setBriefModalSessionId(null)}
+             />
+             
+             {/* Content */}
+             <div 
+                className="relative bg-white rounded-3xl shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 border border-white/20"
+                onClick={(e) => e.stopPropagation()} // Prevent close on content click
+             >
+                <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-white z-10">
+                    <h3 className="text-base font-bold text-gray-800 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary-500"/>
+                        Design Brief Settings
+                    </h3>
+                    <button 
+                        onClick={() => setBriefModalSessionId(null)}
+                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                    >
+                        <X size={20} className="text-gray-400"/>
+                    </button>
+                </div>
+                
+                <div className="flex-1 overflow-hidden relative">
+                    <BriefModalContent sessionId={briefModalSessionId} onClose={() => setBriefModalSessionId(null)} />
+                </div>
+             </div>
+        </div>
+      )}
     </>
   );
+};
+
+// Helper component to load brief data
+const BriefModalContent = ({ sessionId, onClose }: { sessionId: string; onClose: () => void }) => {
+    const { data: briefData, isLoading } = useChatBrief(sessionId);
+    const { mutate: updateBrief } = useUpsertChatBrief(sessionId);
+
+    if (isLoading) {
+        return <div className="p-8 text-center text-gray-500">Loading brief...</div>;
+    }
+    
+    return (
+        <DesignBriefForm 
+            variant="default"
+            initialData={briefData || undefined}
+            onSave={(data) => {
+                updateBrief(data, {
+                    onSuccess: () => {
+                        onClose();
+                    }
+                });
+            }}
+        />
+    )
 };

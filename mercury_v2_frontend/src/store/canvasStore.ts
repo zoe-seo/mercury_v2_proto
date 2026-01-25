@@ -40,6 +40,9 @@ interface CanvasStore {
   // 레이어 데이터 (캐시용)
   layers: CanvasLayer[];
   setLayers: (layers: CanvasLayer[]) => void;
+  addLayer: (layer: CanvasLayer) => void;
+  removeLayer: (layerId: string) => void;
+  updateLayer: (layerId: string, updates: Partial<CanvasLayer>) => void;
 
   // 활성 도구
   activeTool: 'select' | 'hand' | 'brush' | 'eraser' | 'shape' | 'text' | 'image';
@@ -55,9 +58,14 @@ interface CanvasStore {
   setBrushColor: (color: string) => void;
   setBrushOpacity: (opacity: number) => void;
 
-  // Inpaint 모드
+  // Inpaint 모드 (Legacy - to be merged into Edit Mode)
   inpaintMode: boolean;
   setInpaintMode: (mode: boolean) => void;
+
+  // New Edit Mode (Contextual)
+  isEditMode: boolean;
+  editTargetId: string | null;
+  setEditMode: (isActive: boolean, targetId?: string | null) => void;
 }
 
 export const useCanvasStore = create<CanvasStore>((set, get) => ({
@@ -141,6 +149,17 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   // 레이어
   layers: [],
   setLayers: (layers) => set({ layers }),
+  addLayer: (layer) => set((state) => ({ layers: [...state.layers, layer] })),
+  removeLayer: (layerId) => set((state) => ({ layers: state.layers.filter((l) => l.id !== layerId) })),
+  updateLayer: (layerId, updates) =>
+    set((state) => ({
+      layers: state.layers.map((l) => {
+        if (l.id === layerId) {
+          return { ...l, ...updates } as CanvasLayer;
+        }
+        return l;
+      }),
+    })),
 
   // 활성 도구
   activeTool: 'select',
@@ -168,4 +187,9 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   // Inpaint 모드
   inpaintMode: false,
   setInpaintMode: (mode) => set({ inpaintMode: mode }),
+
+  // Edit Mode
+  isEditMode: false,
+  editTargetId: null,
+  setEditMode: (isActive, targetId = null) => set({ isEditMode: isActive, editTargetId: targetId }),
 }));

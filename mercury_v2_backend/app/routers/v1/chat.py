@@ -390,4 +390,71 @@ async def get_task_status(
     return response
 
 
+@router.get("/sessions/{session_id}/brief") # Should add response_model=SuccessResponse[DesignBriefResponse] ideally but generics are tricky in decorator sometimes without proper typing
+async def get_design_brief(
+    session_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get design brief for a chat session."""
+    import uuid as uuid_lib
+    from app.services import design_brief_service
+    from app.schemas.design_brief import DesignBriefResponse
+    from app.schemas.responses import SuccessResponse
+    
+    try:
+        session_uuid = uuid_lib.UUID(session_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid session ID format"
+        )
+    
+    try:
+        brief = await design_brief_service.get_chat_brief(db, session_uuid, current_user.id)
+        return SuccessResponse(
+            data=DesignBriefResponse.model_validate(brief),
+            message="Success"
+        )
+    except NotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
 
+@router.put("/sessions/{session_id}/brief")
+async def upsert_design_brief(
+    session_id: str,
+    data: dict, # Using dict to avoid circular imports? No, local import is fine.
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Upsert design brief for a chat session."""
+    import uuid as uuid_lib
+    from app.services import design_brief_service
+    from app.schemas.design_brief import DesignBriefUpdate, DesignBriefResponse
+    from app.schemas.responses import SuccessResponse
+    
+    try:
+        session_uuid = uuid_lib.UUID(session_id)
+        # Validate body
+        update_data = DesignBriefUpdate(**data)
+    except ValueError:
+         raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid ID format or Body data"
+        )
+    
+    try:
+        brief = await design_brief_service.upsert_chat_brief(
+            db, session_uuid, current_user.id, update_data
+        )
+        return SuccessResponse(
+            data=DesignBriefResponse.model_validate(brief),
+            message="Success"
+        )
+    except NotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )

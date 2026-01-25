@@ -1,5 +1,5 @@
 from sqlalchemy import String, Text, Boolean, Float, Index, text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from datetime import datetime
 import uuid
@@ -40,3 +40,6 @@ class CanvasProject(Base):
         nullable=False
     )
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    # Relationships
+    design_brief = relationship("DesignBrief", back_populates="canvas_project", uselist=False)

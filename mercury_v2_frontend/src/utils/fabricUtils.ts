@@ -1,8 +1,8 @@
 import * as fabric from 'fabric';
-import type { CanvasLayer, LayerType } from '../types/api/canvas';
+import type { CanvasLayer, LayerType, SketchLayerData, ImageLayerData, TextLayerData } from '../types/api/canvas';
 
 /**
- * 서버 레이어 데이터를 Fabric.js 객체로 변환
+ * Convert server layer data to Fabric.js object
  */
 export const layerDataToFabricObject = (
   layer: CanvasLayer
@@ -11,79 +11,98 @@ export const layerDataToFabricObject = (
 
   let fabricObject: fabric.Object | null = null;
 
+  // 1. Try to load from fabric_json if available (most accurate)
+  if (layer_data.fabric_json) {
+    // Note: This is synchronous in fabric v5/v6 if using correct method, 
+    // but fabric.util.enlivenObjects is async.
+    // For simplicity in this sync function, we skip complex hydration here 
+    // or assume simple object creation if JSON not available.
+    // However, since this function is synchronous, we fallback to manual creation below.
+    // Ideally, we should use loadFromJSON async.
+  }
+
   switch (layer_type) {
-    case 'sketch':
-      // SVG Path로 스케치 복원
-      if (layer_data.paths && Array.isArray(layer_data.paths)) {
-        const group = new fabric.Group();
-        layer_data.paths.forEach((pathData: any) => {
-          const path = new fabric.Path(pathData.d, {
+    case 'sketch': {
+      const data = layer_data as SketchLayerData;
+      // If paths exist, create a Group of paths
+      if (data.paths && data.paths.length > 0) {
+        const paths = data.paths.map((pathData: any) => {
+          return new fabric.Path(pathData.d, {
             stroke: pathData.stroke || '#000000',
             strokeWidth: pathData['stroke-width'] || 2,
             fill: 'transparent',
+            strokeDashArray: pathData.strokeDashArray,
           });
-          group.add(path);
         });
-        fabricObject = group;
-      }
-      break;
 
-    case 'image':
-    case 'generated':
-      // 이미지 URL로부터 이미지 객체 생성
-      if (layer_data.image_url) {
-        // 비동기 로딩이 필요하므로 별도 함수 사용 권장
-        // 여기서는 placeholder 반환
+        fabricObject = new fabric.Group(paths, {
+          left: data.x || 0,
+          top: data.y || 0,
+          width: data.width,
+          height: data.height,
+        });
+      } else {
+        // Empty sketch layer -> Create the Frame (Dashed Rect)
         fabricObject = new fabric.Rect({
-          width: layer_data.width || 200,
-          height: layer_data.height || 200,
-          fill: '#e2e8f0',
+          left: data.x || 0,
+          top: data.y || 0,
+          width: data.width || 768,
+          height: data.height || 768,
+          fill: '#ffffff',
+          stroke: '#D4D4D4',
+          strokeWidth: 2,
+          strokeDashArray: [10, 10],
+          selectable: true,
         });
+        // Optional: Add styling details like 'Pencil Icon' here if we used a Group
       }
       break;
+    }
 
-    case 'shape':
-      if (layer_data.shape === 'rect') {
+    case 'image': {
+      const data = layer_data as ImageLayerData;
+      // Image should be loaded async via utils, 
+      // here we return a placeholder if image_url exists, 
+      // actual loading happens in effect in CanvasPage
+      if (data.image_url) {
+        // Placeholder rect while loading
         fabricObject = new fabric.Rect({
-          width: layer_data.width || 100,
-          height: layer_data.height || 100,
-          fill: layer_data.fill || '#3b82f6',
-          stroke: layer_data.stroke,
-          strokeWidth: layer_data.strokeWidth || 0,
-        });
-      } else if (layer_data.shape === 'circle') {
-        fabricObject = new fabric.Circle({
-          radius: layer_data.radius || 50,
-          fill: layer_data.fill || '#3b82f6',
-          stroke: layer_data.stroke,
-          strokeWidth: layer_data.strokeWidth || 0,
+          left: data.x,
+          top: data.y,
+          width: data.width,
+          height: data.height,
+          fill: '#f3f4f6', // Gray-100
+          stroke: '#e5e7eb', // Gray-200
         });
       }
       break;
+    }
 
-    case 'text':
-      fabricObject = new fabric.IText(layer_data.text || 'Text', {
-        fontSize: layer_data.fontSize || 20,
-        fontFamily: layer_data.fontFamily || 'Arial',
-        fill: layer_data.fill || '#000000',
+    case 'text': {
+      const data = layer_data as TextLayerData;
+      fabricObject = new fabric.IText(data.text || 'Text', {
+        left: data.x,
+        top: data.y,
+        fontSize: data.font_size || 20,
+        fontFamily: data.font_family || 'Inter',
+        fill: data.fill || '#000000',
       });
       break;
-
-    default:
-      break;
+    }
   }
 
   if (fabricObject) {
-    // 공통 속성 설정
+    // Common properties
     fabricObject.set({
-      left: layer_data.x || layer_data.left || 0,
-      top: layer_data.y || layer_data.top || 0,
       opacity: opacity,
       selectable: !is_locked,
       evented: !is_locked,
     });
-
-    // 레이어 ID를 Fabric 객체에 저장
+    
+    // Check if properties from layer_data override common ones (like x/y moved to specific cases above, but double check)
+    // Actually fabricObject creation above sets left/top.
+    
+    // Store Metadata
     (fabricObject as any).layerId = layer.id;
     (fabricObject as any).layerType = layer_type;
   }
@@ -92,67 +111,58 @@ export const layerDataToFabricObject = (
 };
 
 /**
- * Fabric.js 객체를 서버 레이어 데이터로 변환
+ * Convert Fabric.js object to server layer data format
  */
 export const fabricObjectToLayerData = (
-  fabricObject: fabric.Object,
-  layerType?: LayerType
+  fabricObject: fabric.Object
 ): Record<string, any> => {
+  const layerType = (fabricObject as any).layerType as LayerType;
+  
   const baseData = {
     x: fabricObject.left || 0,
     y: fabricObject.top || 0,
-    width: fabricObject.width || 0,
-    height: fabricObject.height || 0,
-    scaleX: fabricObject.scaleX || 1,
-    scaleY: fabricObject.scaleY || 1,
-    angle: fabricObject.angle || 0,
+    width: fabricObject.getScaledWidth(),
+    height: fabricObject.getScaledHeight(),
+    scale_x: fabricObject.scaleX || 1,
+    scale_y: fabricObject.scaleY || 1,
+    rotation: fabricObject.angle || 0,
   };
 
-  // 타입별 추가 데이터
-  if (fabricObject instanceof fabric.Path) {
-    return {
-      ...baseData,
-      d: (fabricObject as any).path,
-      stroke: fabricObject.stroke,
-      'stroke-width': fabricObject.strokeWidth,
-    };
-  } else if (fabricObject instanceof fabric.Image) {
-    return {
-      ...baseData,
-      image_url: (fabricObject as any).getSrc(),
-    };
-  } else if (fabricObject instanceof fabric.Rect) {
-    return {
-      ...baseData,
-      shape: 'rect',
-      fill: fabricObject.fill,
-      stroke: fabricObject.stroke,
-      strokeWidth: fabricObject.strokeWidth,
-    };
-  } else if (fabricObject instanceof fabric.Circle) {
-    return {
-      ...baseData,
-      shape: 'circle',
-      radius: (fabricObject as any).radius,
-      fill: fabricObject.fill,
-      stroke: fabricObject.stroke,
-      strokeWidth: fabricObject.strokeWidth,
-    };
-  } else if (fabricObject instanceof fabric.IText || fabricObject instanceof fabric.Text) {
-    return {
-      ...baseData,
-      text: (fabricObject as any).text,
-      fontSize: (fabricObject as any).fontSize,
-      fontFamily: (fabricObject as any).fontFamily,
-      fill: fabricObject.fill,
-    };
-  }
+  if (!layerType) return baseData;
 
-  return baseData;
+  switch (layerType) {
+    case 'text': {
+       const textObj = fabricObject as fabric.IText;
+       return {
+         ...baseData,
+         text: textObj.text,
+         font_size: textObj.fontSize,
+         font_family: textObj.fontFamily,
+         fill: textObj.fill,
+       };
+    }
+    case 'sketch': {
+      // if it's a group, extract paths?
+      // For now, assuming we save paths if simplified
+      return {
+        ...baseData,
+        // paths: ... extraction logic complex for Group
+      };
+    }
+    case 'image': {
+      const imgObj = fabricObject as fabric.Image;
+      return {
+        ...baseData,
+        image_url: imgObj.getSrc(),
+      };
+    }
+    default:
+      return baseData;
+  }
 };
 
 /**
- * 이미지 URL로부터 Fabric Image 객체 생성 (비동기)
+ * Load Image from URL Async
  */
 export const loadImageFromUrl = async(
   url: string,
@@ -170,51 +180,7 @@ export const loadImageFromUrl = async(
 };
 
 /**
- * 캔버스를 이미지로 내보내기
- */
-export const exportCanvasToImage = (
-  canvas: fabric.Canvas,
-  format: 'png' | 'jpeg' = 'png',
-  quality = 1
-): string => {
-  return canvas.toDataURL({
-    format,
-    quality,
-    multiplier: 1,
-  });
-};
-
-/**
- * SVG Path를 마스크 이미지로 변환
- */
-export const createMaskFromPath = (
-  paths: any[],
-  width: number,
-  height: number
-): string => {
-  // 임시 캔버스 생성
-  const tempCanvas = new fabric.Canvas(null as any, { width, height });
-
-  paths.forEach((pathData) => {
-    const path = new fabric.Path(pathData.d || pathData, {
-      fill: '#FFFFFF',
-      stroke: null,
-    });
-    tempCanvas.add(path);
-  });
-
-  const dataUrl = tempCanvas.toDataURL({
-    multiplier: 1,
-    format: 'png',
-    quality: 1,
-  });
-
-  tempCanvas.dispose();
-  return dataUrl;
-};
-
-/**
- * Fabric 객체에서 바운딩 박스 추출
+ * Extract bounds
  */
 export const getObjectBounds = (obj: fabric.Object) => {
   const bounds = obj.getBoundingRect();

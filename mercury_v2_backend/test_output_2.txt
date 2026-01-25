@@ -1,0 +1,177 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.3, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-1.3.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 2 items
+
+tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat FAILED [ 50%]
+tests/api/v1/test_design_brief.py::test_sync_brief_chat_to_canvas FAILED [100%]
+
+================================== FAILURES ===================================
+____________________ test_create_and_get_design_brief_chat ____________________
+
+client = <httpx.AsyncClient object at 0x000001ABA32A6120>
+test_db = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x000001ABA32A46E0>
+auth_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNDVhYzQxZS1hM2VmLTQwMjMtODUzNC1hN2ViMzQ3ZTY0NjYiLCJleHAiOjE3NjkzNDk0ODR9.-LcmOic8RjDFQEy5wwthxIHauU3VqYinJMAzG5kmUKA'}
+
+    @pytest.mark.asyncio
+    async def test_create_and_get_design_brief_chat(
+        client: AsyncClient,
+        test_db: AsyncSession,
+        auth_headers: dict
+    ):
+        # 1. Create a chat session first
+        response = await client.post(
+            "/api/v1/chat/sessions",
+            headers=auth_headers,
+            json={"title": "Test Session"}
+        )
+        assert response.status_code == 201
+        session_id = response.json()["data"]["id"]
+    
+        # 2. Get Brief (should be 404 initially)
+        response = await client.get(
+            f"/api/v1/chat/sessions/{session_id}/brief",
+            headers=auth_headers
+        )
+        assert response.status_code == 404
+    
+        # 3. Create/Upsert Brief
+        brief_data = {
+            "concept_info": {"theme": "Test Theme"},
+            "shoe_spec": {"category": "Running"},
+            "marketing_context": {"season": "2024 SS"}
+        }
+        response = await client.put(
+            f"/api/v1/chat/sessions/{session_id}/brief",
+            headers=auth_headers,
+            json=brief_data
+        )
+        assert response.status_code == 200
+>       data = response.json()["data"]
+               ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'data'
+
+tests\api\v1\test_design_brief.py:42: KeyError
+_______________________ test_sync_brief_chat_to_canvas ________________________
+
+client = <httpx.AsyncClient object at 0x000001ABA395CCD0>
+test_db = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x000001ABA395C690>
+auth_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZjdhMDE4MS03NjQ4LTQ2OTctYWY2MS02NTBlZmQyODlhNmEiLCJleHAiOjE3NjkzNDk0ODV9.OxlLLIHFDLievbCjpllaHvpsXhRiR4wD-vrDAkH-rCU'}
+
+    @pytest.mark.asyncio
+    async def test_sync_brief_chat_to_canvas(
+        client: AsyncClient,
+        test_db: AsyncSession,
+        auth_headers: dict
+    ):
+        # 1. Create Chat Session and Brief
+        chat_resp = await client.post(
+            "/api/v1/chat/sessions",
+            headers=auth_headers,
+            json={"title": "Source Chat"}
+        )
+        chat_id = chat_resp.json()["data"]["id"]
+    
+        await client.put(
+            f"/api/v1/chat/sessions/{chat_id}/brief",
+            headers=auth_headers,
+            json={
+                "concept_info": {"theme": "Source Theme"},
+                "shoe_spec": {"category": "Source Category"}
+            }
+        )
+    
+        # 2. Create Canvas Project
+        canvas_resp = await client.post(
+            "/api/v1/canvas/instances",
+            headers=auth_headers,
+            json={"name": "Target Canvas"}
+        )
+        assert canvas_resp.status_code == 201
+    
+        # Check if the canvas response wraps ID in 'data'
+        canvas_id = canvas_resp.json()["data"]["id"]
+    
+        # 3. Sync
+        response = await client.post(
+            f"/api/v1/canvas/instances/{canvas_id}/brief/sync",
+            headers=auth_headers,
+            json={"source_chat_session_id": chat_id}
+        )
+        assert response.status_code == 200
+>       data = response.json()["data"]
+               ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'data'
+
+tests\api\v1\test_design_brief.py:95: KeyError
+============================== warnings summary ===============================
+app\core\config.py:5
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\core\config.py:5: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Settings(BaseSettings):
+
+app\schemas\pagination.py:4
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\schemas\pagination.py:4: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class PaginationParams(BaseModel):
+
+tests/api/v1/test_design_brief.py: 16 warnings
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\.venv\Lib\site-packages\sqlalchemy\sql\schema.py:3624: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore
+
+tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat
+tests/api/v1/test_design_brief.py::test_sync_brief_chat_to_canvas
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\core\auth.py:43: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\schemas\design_brief.py:8: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'example'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    theme: Optional[str] = Field(None, example="Minimalist Runner")
+
+tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\schemas\design_brief.py:9: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'example'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    target_audience: Optional[Dict[str, Any]] = Field(None, example={"gender": "unisex", "age_group": "20s"})
+
+tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\schemas\design_brief.py:10: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'example'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    overall_tone: Optional[str] = Field(None, example="Clean, Modern")
+
+tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\schemas\design_brief.py:14: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'example'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    category: Optional[str] = Field(None, example="Running")
+
+tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\schemas\design_brief.py:15: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'example'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    upper_material: Optional[str] = Field(None, example="Mesh")
+
+tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\schemas\design_brief.py:16: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'example'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    sole_type: Optional[str] = Field(None, example="Chunky")
+
+tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\schemas\design_brief.py:17: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'example'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    key_colors: Optional[List[str]] = Field(None, example=["#000000", "#FFFFFF"])
+
+tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\schemas\design_brief.py:21: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'example'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    season: Optional[str] = Field(None, example="2024 SS")
+
+tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\schemas\design_brief.py:22: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'example'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    price_point: Optional[str] = Field(None, example="Mid")
+
+tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\schemas\design_brief.py:23: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'example'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    competitors: Optional[List[str]] = Field(None, example=["Nike Pegasus"])
+
+tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat
+  C:\Users\tjwn1\Desktop\mercury_v2_proto\mercury_v2_backend\app\schemas\design_brief.py:37: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class DesignBriefResponse(DesignBriefBase):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/api/v1/test_design_brief.py::test_create_and_get_design_brief_chat
+FAILED tests/api/v1/test_design_brief.py::test_sync_brief_chat_to_canvas - Ke...
+======================= 2 failed, 31 warnings in 2.28s ========================

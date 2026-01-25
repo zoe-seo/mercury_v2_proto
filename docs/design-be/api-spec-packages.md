@@ -85,6 +85,45 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ## 7. 디자인 패키지 (Design Packages)
 
+### 7.0 디자인 패키지 생성 [READY]
+
+**POST** `/design-packages`
+
+**Headers**: `Authorization: Bearer {token}`
+
+**Request Body**:
+```json
+{
+  "source_type": "canvas", // chat | canvas
+  "source_id": "canvas-uuid-1",
+  "title": "New Package",
+  "description": "Package description",
+  "project_id": "proj-uuid-1", // Optional
+  "metadata": {
+    "keywords": ["modern", "sleek"],
+    "brand_info": {
+      "brand_name": "MyBrand",
+      "philosophy": "Innovation"
+    }
+  },
+  "color_palette": ["#ffffff", "#000000"],
+  "selected_image_ids": ["img-uuid-1", "img-uuid-2"] // List of generated image IDs to include
+}
+```
+
+**Response** (201):
+```json
+{
+  "data": {
+    "id": "pkg-uuid-new",
+    "title": "New Package",
+    "created_at": "2026-01-25T12:00:00Z"
+  }
+}
+```
+
+---
+
 ### 7.1 디자인 패키지 목록 조회 (갤러리)
 
 **GET** `/design-packages`

@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { cn } from '../../utils/cn';
 import type { ChatMessage } from '@/types/api/chat';
 import { User, Wand2 } from 'lucide-react';
+import { InitialBriefingBubble } from './InitialBriefingBubble';
 
 interface MessageItemProps {
   message: ChatMessage;
@@ -58,7 +59,17 @@ export const MessageItem = ({ message }: MessageItemProps) => {
           </div>
         </div>
 
-        {/* TODO: Generated Images Grid - message_metadata에서 이미지 처리 */}
+        {/* Generated Images Grid - message_metadata에서 이미지 처리 */}
+
+        {/* Design Brief Bubble */}
+        {!isUser && message.metadata?.brief_request && (
+          <InitialBriefingBubble 
+            briefData={message.metadata.brief_request.brief_data}
+            // onSave logic will be handled by context or parent? 
+            // For now, let's keep it local or pass a mock handler if needed.
+            // Ideally, saving should update the backend.
+          />
+        )}
 
       </div>
 

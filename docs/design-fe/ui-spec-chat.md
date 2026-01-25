@@ -151,6 +151,11 @@ ChatPage
     - 둥근 모서리 (rounded-lg)
     - 클릭 시 이미지 뷰어 모달 오픈
     - 액션 버튼: "Vary", "Upscale", "Edit in Canvas"
+  - **Initial Briefing Bubble**:
+    - [REQ-007](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/requirements/req-007-design-brief.md)에 따른 디자인 브리프 입력 폼.
+    - AI가 첫 추론 후 메시지 내에 포함하여 출력.
+    - **Summary View** (기본) -> **Edit Mode** (확장) -> **Locked** (확정 후).
+    - 상세 UI: [ui-spec-design-brief.md](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/design-fe/ui-spec-design-brief.md) 참조.
 
 #### Input Container
 - **위치**: Message List 하단, Image History 상단

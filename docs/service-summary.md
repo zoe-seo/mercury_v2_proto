@@ -300,6 +300,7 @@ finalize_report (최종 리포트 조합)
 - [REQ-003: Sketch to Design](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/requirements/req-003-sketch-to-design.md)
 - [REQ-004: Gallery & Export](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/requirements/req-004-gallery-export.md)
 - [REQ-005: User Profile](file:///c:/Users/bytesize/Desktop/mercury_v2/docs/requirements/req-005-user-profile.md)
+- [REQ-007: Unified Design Brief](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/requirements/req-007-design-brief.md)
 - [Architecture Decisions](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/design/architecture-decisions.md)
 - [Project Rules](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/PROJECT_RULES.md)
 

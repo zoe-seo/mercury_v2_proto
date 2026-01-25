@@ -21,9 +21,11 @@ erDiagram
     chat_sessions ||--o{ chat_messages : contains
     chat_sessions ||--o{ generated_images : produces
     chat_sessions ||--o{ design_packages : generates
-    
+    chat_sessions ||--o| design_briefs : has
+
     canvas_projects ||--o{ canvas_layers : contains
     canvas_projects ||--o{ design_packages : generates
+    canvas_projects ||--o| design_briefs : has
     
     design_packages ||--o{ design_images : includes
     design_packages ||--o{ market_reports : includes
@@ -165,6 +167,17 @@ erDiagram
         jsonb competitor_data
         jsonb chart_data
         timestamp created_at
+    }
+
+    design_briefs {
+        uuid id PK
+        uuid chat_session_id FK "nullable, unique"
+        uuid canvas_project_id FK "nullable, unique"
+        jsonb concept_info
+        jsonb shoe_spec
+        jsonb marketing_context
+        timestamp created_at
+        timestamp updated_at
     }
 ```
 
@@ -311,17 +324,17 @@ AI가 생성한 모든 이미지를 기록합니다.
 
 ### 3.7 canvas_layers (캔버스 레이어)
 
-캔버스 내의 개별 레이어입니다.
+캔버스 내의 개별 노드(레이어)입니다. 각 노드는 768x768px 고정 크기를 가지며, 타입별로 다른 데이터 구조를 `layer_data` JSONB에 저장합니다.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | id | UUID | PK | 레이어 고유 ID |
 | canvas_project_id | UUID | FK → canvas_projects(id), NOT NULL | 캔버스 프로젝트 ID |
-| layer_type | VARCHAR(50) | NOT NULL | 레이어 타입 (sketch/image/generated) |
-| layer_data | JSONB | NOT NULL | 레이어 데이터 (좌표, 스타일, 이미지 참조 등) |
-| z_index | INTEGER | NOT NULL | 레이어 순서 |
+| layer_type | VARCHAR(50) | NOT NULL | 레이어 타입 (`sketch`, `image`, `text`) |
+| layer_data | JSONB | NOT NULL | 레이어 데이터 (타입별 구조 상이) |
+| z_index | INTEGER | NOT NULL | 레이어 순서 (렌더링 순서) |
 | is_visible | BOOLEAN | NOT NULL, DEFAULT TRUE | 표시 여부 |
-| is_locked | BOOLEAN | NOT NULL, DEFAULT FALSE | 잠금 여부 |
+| is_locked | BOOLEAN | NOT NULL, DEFAULT FALSE | 잠금 여부 (편집 방지) |
 | opacity | FLOAT | NOT NULL, DEFAULT 1.0 | 투명도 (0.0 ~ 1.0) |
 | created_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 생성 일시 |
 | updated_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 수정 일시 |
@@ -329,6 +342,103 @@ AI가 생성한 모든 이미지를 기록합니다.
 **인덱스**:
 - `idx_canvas_layers_canvas_project_id` on `canvas_project_id`
 - `idx_canvas_layers_z_index` on `(canvas_project_id, z_index)`
+- `idx_canvas_layers_type` on `(canvas_project_id, layer_type)`
+
+#### layer_data JSONB 구조 (타입별)
+
+##### 1. `sketch` 타입 (스케치 노드)
+사용자가 브러시로 그린 자유 드로잉입니다.
+
+```json
+{
+  "paths": [
+    {
+      "d": "M 10 10 L 100 100 C 150 150 200 200 250 250",
+      "stroke": "#000000",
+      "stroke-width": 2,
+      "fill": "none"
+    }
+  ],
+  "x": 100,
+  "y": 100,
+  "width": 768,
+  "height": 768,
+  "fabric_json": { /* Fabric.js Path Object 전체 직렬화 데이터 */ }
+}
+```
+
+**필드 설명**:
+- `paths`: SVG Path 데이터 배열 (각 브러시 스트로크)
+- `x`, `y`: 캔버스 상의 위치
+- `width`, `height`: 노드 크기 (고정 768x768)
+- `fabric_json`: Fabric.js 객체 복원용 전체 데이터
+
+##### 2. `image` 타입 (이미지 노드)
+업로드, AI 생성, Chat 가져오기 이미지입니다.
+
+```json
+{
+  "image_url": "https://s3.amazonaws.com/bucket/images/abc123.png",
+  "source": "upload" | "ai_generated" | "chat_import",
+  "x": 100,
+  "y": 100,
+  "width": 768,
+  "height": 768,
+  "scale_x": 1.0,
+  "scale_y": 1.0,
+  "rotation": 0,
+  
+  // AI 생성인 경우 추가 필드
+  "parent_layer_id": "layer-uuid-1",
+  "prompt": "고급스러운 가죽 소재, 브라운 컬러",
+  "generation_params": {
+    "strength": 0.7,
+    "steps": 50,
+    "guidance_scale": 7.5,
+    "model": "stable-diffusion-xl"
+  },
+  "reference_layer_ids": ["layer-uuid-2", "layer-uuid-3"],
+  
+  // Chat 가져오기인 경우
+  "chat_message_id": "msg-uuid",
+  
+  "fabric_json": { /* Fabric.js Image Object */ }
+}
+```
+
+**필드 설명**:
+- `image_url`: S3에 저장된 이미지 URL (필수)
+- `source`: 이미지 출처 구분
+  - `upload`: 사용자 직접 업로드
+  - `ai_generated`: AI 생성 (Sketch-to-Image, Inpainting)
+  - `chat_import`: Chat 세션에서 가져온 이미지
+- `parent_layer_id`: AI 생성인 경우, 기반이 된 부모 노드 ID (계보 추적용)
+- `prompt`: AI 생성 시 사용된 프롬프트
+- `generation_params`: AI 생성 파라미터
+- `reference_layer_ids`: 생성 시 참조한 다른 노드 ID 배열
+- `chat_message_id`: Chat에서 가져온 경우 원본 메시지 ID
+
+##### 3. `text` 타입 (텍스트 메모)
+캔버스에 남기는 메모입니다.
+
+```json
+{
+  "text": "디자인 의도: 빈티지 스타일 강조",
+  "x": 100,
+  "y": 100,
+  "font_family": "Inter",
+  "font_size": 16,
+  "fill": "#000000",
+  "width": 200,
+  "height": 50,
+  "fabric_json": { /* Fabric.js IText Object */ }
+}
+```
+
+**필드 설명**:
+- `text`: 메모 내용
+- `font_family`, `font_size`, `fill`: 텍스트 스타일
+- `width`, `height`: 텍스트 박스 크기 (가변)
 
 ---
 
@@ -395,6 +505,28 @@ AI가 생성한 모든 이미지를 기록합니다.
 
 **인덱스**:
 - `idx_market_reports_package_id` on `design_package_id`
+
+---
+
+### 3.11 design_briefs (디자인 브리프)
+
+[REQ-007] Unified Design Brief의 데이터 저장소입니다. Chat 세션 또는 Canvas 프로젝트와 1:1로 매핑됩니다.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | UUID | PK | 브리프 고유 ID |
+| chat_session_id | UUID | FK -> chat_sessions(id), UNIQUE, NULLABLE | 연결된 채팅 세션 |
+| canvas_project_id | UUID | FK -> canvas_projects(id), UNIQUE, NULLABLE | 연결된 캔버스 프로젝트 |
+| concept_info | JSONB | NULL | Concept & Identity (Theme, Target Audience, Tone) |
+| shoe_spec | JSONB | NULL | Shoe Specs (Category, Material, Sole, Colors) |
+| marketing_context | JSONB | NULL | Marketing Context (Season, Price, Competitors) |
+| created_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 생성 일시 |
+| updated_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 수정 일시 |
+
+**인덱스**:
+- `idx_design_briefs_chat_session_id` on `chat_session_id`
+- `idx_design_briefs_canvas_project_id` on `canvas_project_id`
+
 
 ---
 

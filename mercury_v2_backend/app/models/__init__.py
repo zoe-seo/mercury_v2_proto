@@ -9,6 +9,7 @@ from app.models.design_package import DesignPackage
 from app.models.design_image import DesignImage
 from app.models.production_asset import ProductionAsset
 from app.models.market_report import MarketReport
+from app.models.design_brief import DesignBrief
 
 __all__ = [
     "User",
@@ -22,4 +23,5 @@ __all__ = [
     "DesignImage",
     "ProductionAsset",
     "MarketReport",
+    "DesignBrief",
 ]

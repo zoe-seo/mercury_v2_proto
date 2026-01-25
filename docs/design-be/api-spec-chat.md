@@ -255,6 +255,17 @@ data: {"delta": "입니다!"}
 event: message_complete
 data: {"message_id": "msg-uuid-3", "content": "좋은 선택입니다! 미니멀한 디자인으로 진행하겠습니다."}
 
+event: brief_request
+data: {
+  "message_id": "msg-uuid-4",
+  "brief_data": {
+    "concept_info": { "theme": "Minimalist Black & White" },
+    "shoe_spec": { "key_colors": ["#000000", "#FFFFFF"] },
+    "marketing_context": { "season": "2024 SS" }
+  },
+  "is_required": true
+}
+
 event: done
 data: {}
 ```

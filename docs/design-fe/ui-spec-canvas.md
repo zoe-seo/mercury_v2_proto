@@ -27,8 +27,8 @@
 - `/canvas` (캔버스 목록 페이지)
 - `/canvas/:canvasId` (캔버스 편집 페이지)
 
-> [!IMPORTANT]
-> `/canvas/new` 라우트는 **제거**되었습니다. 새 캔버스 생성은 Home 페이지의 "Sketch to Design" 버튼을 통해 모달에서 이루어집니다.
+> [!NOTE]
+> 새 캔버스 생성은 Home 페이지의 "Sketch to Design" 버튼을 통해 모달에서 이루어집니다.
 
 ### 1.3 레이아웃 모드
 - **Full-screen Mode**: 몰입감을 위해 Side Navigation을 숨기고 캔버스 영역을 최대화합니다.
@@ -36,7 +36,6 @@
 
 ### 1.4 기술 스택 (Technical Stack)
 - **Canvas Engine**: **Fabric.js**
-  - **선정 이유**: Object Model 기반의 강력한 편집 기능(선택, 변형, 그룹화), 자유 드로잉 브러시 API, 그리고 복잡한 마스킹(ClipPath/Composite) 지원이 본 프로젝트의 요구사항(스케치, 인페인팅, 세그멘테이션)에 가장 부합합니다.
 
 ### 1.5 저장 및 히스토리 관리 (Persistence)
 - **자동 저장 (Auto-save)**: 
@@ -60,15 +59,15 @@ CanvasPage
 └── MainContent (Full Screen, Relative)
     ├── InfiniteCanvas (Z-0)
     │   ├── GridBackground
-    │   └── CanvasLayer (Stages)
-    │       ├── ObjectLayer (Images, Shapes, Text)
-    │       ├── SegmentationLayer (AI Metadata, Hidden by default)
-    │       ├── DrawingLayer (Brush Strokes)
-    │       └── SelectionOverlay (Handles, Bounds, Segments Highlight)
+    │   └── CanvasLayer
+    │
+    ├── SpecPanel (Z-40, Left Sidebar, 320px)
+    │   └── DesignBriefForm
     │
     ├── TopToolbar (Z-50, Floating, Top Center)
     │   ├── CanvasName (Editable)
-    │   ├── ToolsGroup (Select, Hand, Brush, Eraser, Shape, Text, Image)
+    │   ├── NodeCreationGroup (Sketch, Image, Text)
+    │   ├── ToolsGroup (Select, Hand)
     │   ├── Divider
     │   └── ActionsGroup (Undo, Redo, Zoom, Save Status)
     │
@@ -118,7 +117,7 @@ CreateCanvasModal
 
 ### 3.1 Top Toolbar (Main Tools)
 
-사용자가 가장 빈번하게 사용하는 도구들을 모아둔 플로팅 바입니다.
+사용자가 가장 빈번하게 사용하는 도구들을 모아둔 플로팅 바입니다. **브러시, 지우개 등의 편집 도구는 개별 노드 선택 시 나타나는 Context Toolbar로 이동되었습니다.**
 
 - **위치**: 상단 중앙 (Header 하단 24px 지점)
 - **스타일**:
@@ -129,54 +128,108 @@ CreateCanvasModal
   - 애니메이션: Slide Down (진입 시)
 
 **구성 요소 (좌에서 우로)**:
-1.  **Select (V)**: 객체 선택 및 이동 (Default)
-2.  **Hand (H)**: 캔버스 패닝 (Spacebar Hold)
-3.  **Brush (B)**: 자유 그리기
-4.  **Eraser (E)**: 지우개
-5.  **Shape (R)**: 사각형, 원형, 선
-6.  **Text (T)**: 텍스트 삽입
-7.  **Image (I)**: 이미지 업로드
-    - **제약 사항**: 최대 2048px 해상도, 10MB 용량 제한.
-    - **UX**: 파일 선택/드롭 시 가이드 텍스트 표시 및 리사이징(클라이언트 사이드) 수행.
-    *   *(Divider)*
-8.  **Undo (Cmd+Z)**: 실행 취소
-9.  **Redo (Cmd+Shift+Z)**: 다시 실행
-10. **Zoom**: 현재 확대율 표시 (클릭 시 100% 리셋)
-    *   *(Divider)*
-12. **Save Status**: `Saved` / `Saving...` 상태 표시 아이콘 (편집 시 자동 저장 트리거)
 
-**인터랙션**:
-- 활성 도구는 `bg-primary-50` 배경과 `text-primary-600` 색상으로 강조됩니다.
-- 각 아이콘 호버 시 툴팁(단축키 포함)이 표시됩니다.
+#### 1. Canvas Name
+- 현재 캔버스 이름 표시 및 수정
+- 클릭 시 인풋 필드로 전환되어 이름 변경 가능
 
----
+*(Divider)*
 
-### 3.2 Properties Panel (Contextual)
+#### 2. 노드 생성 그룹
+1.  **Add Sketch Node**: 768x768px 스케치 프레임 생성
+    - 아이콘: 연필 + 사각형 프레임
+    - 클릭 시 캔버스 중앙에 빈 스케치 노드 생성
+2.  **Upload Image**: 이미지 파일 업로드
+    - 아이콘: `ImageIcon`
+    - 제약: 최대 10MB, 2048px
+    - 자동 리사이징 후 768x768px 노드 생성
+3.  **Add Text**: 텍스트 메모 노드 생성
+    - 아이콘: `Type`
+    - 가변 크기, 기본 폰트 Inter 16px
 
-현재 선택된 도구에 따라 동적으로 변하는 속성 패널입니다. `3.1 Top Toolbar`의 좌측 하단(왼쪽 정렬)에 위치합니다.
+*(Divider)*
 
-- **위치**: 왼쪽 상단 (Top Toolbar와 수평 정렬 or 좌측면)
-  - *Recommendation*: 캔버스 작업 영역 확보를 위해 **왼쪽 상단(Header 아래 24px, 왼쪽 24px)**에 고정 위치합니다.
-- **크기**: 너비 240px, 높이 Auto
-- **스타일**: `rounded-xl`, `bg-white/90` (Backdrop blur), `shadow-md`
+#### 3. 도구 그룹 (View Controls)
+4.  **Select (V)**: 노드 선택 및 이동 (Default)
+5.  **Hand (H)**: 캔버스 패닝 (Spacebar Hold)
 
-**상태별 콘텐츠**:
-- **Selection 모드**: 선택된 객체의 속성 (좌표 X/Y, 크기 W/H, 투명도)
-- **Brush 모드 (Drawing)**:
-  - **Brush Size**: 슬라이더 + 픽셀 값 직접 입력 (Key: `[` / `]`)
-  - **Color Control**:
-    - **Color Picker**: 정밀 색상 선택 (Gradient/Wheel)
-    - **Hex Input**: `#14AE5C` 형태의 텍스트 직접 입력, 복사/붙여넣기 지원
-    - **Eyedropper (I)**: 캔버스 내 색상 추출 도구
-    - **Recent Colors**: 최근 사용한 색상 리스트 (5개)
-    - *목적*: AI 모델은 스케치의 색상 정보를 힌트(ControlNet Color map 등)로 사용하여 결과물의 색조를 결정하므로, 정확한 의도 전달을 위해 색상 선택이 중요합니다.
-  - **Opacity**: 투명도 슬라이더 (레이어링 효과)
-- **Shape 모드**: Fill Color, Stroke Color, Stroke Width
-- **Text 모드**: Font Family, Size, Weight, Align
+*(Divider)*
+
+#### 4. 액션 그룹
+6.  **Undo (Cmd+Z)**: 실행 취소
+7.  **Redo (Cmd+Shift+Z)**: 다시 실행
+8.  **Zoom Indicator**: 현재 확대율 표시 (클릭 시 100% 리셋)
+
+*(Divider)*
+
+#### 5. 상태 표시
+9.  **Node Count**: `12/20` 형태로 현재 노드 수 표시
+    - 20개 도달 시 빨간색으로 강조
+10. **Save Status**: 
+    - `Saving...` (Spinner)
+    - `Saved` (Check)
+    - `Error` (Alert)
 
 ---
 
-### 3.3 Layers Panel
+### 3.2 Spec Side Panel (Design Brief)
+
+[REQ-007](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/requirements/req-007-design-brief.md)에 정의된 **Unified Design Brief**를 입력하는 고정 패널입니다.
+
+- **위치**: 화면 왼쪽 고정 (Left Sidebar)
+- **너비**: 320px
+- **동작**: Collapsible (접었을 때 너비 0px, 헤더의 햄버거 메뉴로 토글)
+- **내용**: `DesignBriefForm` (공통 컴포넌트)
+- **Persistence**: 
+  - 수정 시 즉시 자동 저장 (Canvas 메타데이터로 저장)
+  - `Global Context`로서 이후 생성되는 모든 이미지에 프롬프트로 주입됨.
+- **상세 UI**: [ui-spec-design-brief.md](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/design-fe/ui-spec-design-brief.md) 참조.
+
+---
+
+### 3.3 Context Toolbar (Node-Specific Tools)
+
+특정 노드(Sketch, Image 등)를 선택했을 때 해당 객체 상단에 나타나는 플로팅 툴바입니다. 노드 타입에 따라 필요한 편집 도구를 제공합니다.
+
+- **위치**: 선택된 객체의 상단 중앙 (Floating)
+- **스타일**: `rounded-full`, `bg-white`, `shadow-lg`, `border-gray-200`
+- **애니메이션**: Fade In/Out + Scale
+
+**상태별 모드**:
+
+#### A. 기본 선택 상태 (Selection State)
+- **Edit/Inpaint Button**:
+  - Sketch Node: "Edit Sketch" (Brush 아이콘)
+  - Image Node: "Inpaint" (Brush 아이콘)
+  - 클릭 시 **[Edit Mode]**로 진입
+- **Close/Delete Button**: 선택 해제 또는 삭제 (X 아이콘)
+
+#### B. 편집 모드 (Edit Mode)
+노드 내부 편집을 위한 도구가 활성화된 상태입니다.
+- **Editing Badge**: "EDITING" 상태 표시
+- **Drawing Tools**:
+  - **Brush**: 그리기 도구 (Active 시 Primary Color)
+  - **Eraser**: 지우개 도구
+- **Palette Button**: 색상/브러시 크기 설정 패널 토글 (Properties Panel 연동)
+- **Done Button**: 편집 완료 및 저장 (Check 아이콘)
+
+---
+
+### 3.3 Properties Panel (Contextual Settings)
+
+현재 활성화된 도구의 세부 속성을 제어하는 패널입니다. Context Toolbar에서 편집 모드 진입 시 브러시 설정을 제공합니다.
+
+- **위치**: 왼쪽 상단 (Floating)
+- **구성**:
+  - **Brush Mode**:
+    - **Size**: 브러시 크기 슬라이더 (1px ~ 100px)
+    - **Color**: HEX 입력, Color Palette, Eyedropper
+  - **Select Mode**:
+    - 선택된 객체의 좌표(X, Y) 및 크기(W, H) 정보 (Read-only)
+
+---
+
+### 3.4 Layers Panel
 
 복잡한 작업을 관리하기 위한 레이어 패널입니다.
 
@@ -191,53 +244,35 @@ CreateCanvasModal
 - **Opacity**: 레이어별 불투명도 조절 (0~1.0) -> 서버 API 연동 (`opacity` 필드)
 - **Blending Mode**: (Advanced) Multiply, Screen, Overlay 등 지원
 
-### 3.4 Segments Panel (New)
-    
-AI가 분석한 이미지의 파트 정보를 표시하고 선택을 돕는 패널입니다. `3.3 Layers Panel` 하단에 위치하거나 탭으로 구분됩니다.
+### 3.5 Unified Image Context Panel (Generation & Edit)
 
-- **위치**: 오른쪽 하단 (Layers Panel 아래)
+이미지 노드가 선택되었을 때 활성화되는 통합 패널입니다. 기존의 `Segments Panel`과 `AI Prompt Panel`이 통합되어, 프롬프팅부터 마스킹(세그멘테이션/인페인팅)까지 한 곳에서 처리합니다.
+
+- **위치**: 선택된 이미지 노드 하단 중앙 (Floating)
 - **구성**:
-  - **Auto-Detect Button**: "Analyze Sketch" 버튼 (AI 세그멘테이션 실행)
-  - **Parts List**: 인식된 파트들의 태그 리스트 (Pill shape)
-    - 예: `[Sole]`, `[Laces]`, `[Heel]`, `[Logo]`
-  - **Interaction**:
-    - **Hover**: 캔버스 상에 해당 파트영역 **반투명 컬러 하이라이트 + 외곽선(Outline/Glow)** 효과 병행 (복잡한 텍스처 위에서도 가독성 확보).
-    - **Click**: 해당 영역이 'Mask' 상태로 선택됨 -> AI Prompt Panel 활성화.
-    - **Technical Implementation**: API가 제공하는 SVG Path 데이터를 Fabric.js의 `fabric.Path` 객체로 생성하여 최상단 오버레이 레이어에 배치.
 
----
+#### A. Prompt Section (Top)
+- **Prompt Input**: 텍스트 입력창 (멀티라인)
+- **Generate Button**: 생성 실행
+- **Style/Settings**: (Collapsible) 스타일 프리셋, 시드 값 등
 
-### 3.5 AI Prompt Panel (Contextual)
+#### B. Masking & Tools Section (Middle, Collapsible)
+- **Mode Toggle**:
+  - `Smart Select` (Segmentation)
+  - `Manual Brush` (Inpainting)
 
-이미지 생성 및 수정을 위한 핵심 패널입니다. 객체가 선택되거나, 특정 영역을 지정했을 때 해당 위치 근처에 팝오버(Popover) 형태로 나타납니다.
+- **Smart Select Mode**:
+  - **Analyze Button**: 이미지 파트 분석 실행
+  - **Parts Tags**: 분석된 파트 리스트 (예: `[Sole]`, `[Upper]`)
+  - **Interaction**: 태그 클릭 시 해당 영역 마스킹 추가/제거
 
-- **위치**: 선택 영역 바로 하단 중앙 (Floating)
-  - **충돌 감지 Logic**: 
-    - 패널이 화면 하단/우측 경계를 벗어날 경우, 선택 영역의 **상단 또는 좌측**으로 위치를 반전(Flip)하여 표시.
-    - 캔버스 줌 레벨에 관계없이 항상 화면(Viewport) 내에 존재하도록 조정.
-- **스타일**: `rounded-lg`, `bg-white`, `border-primary-200`, `shadow-xl`
+- **Manual Brush Mode**:
+  - **Tools**: `Add Mask (Brush)`, `Remove Mask (Eraser)`
+  - **Settings**: Brush Size 슬라이더
 
-**구성 요소**:
-1.  **Prompt Input**:
-    - Placeholder: "Describe what to generate..."
-    - Multi-line resizing
-    - `✨` 아이콘 버튼 (Enhance Prompt)
-2.  **Action Buttons**:
-    - `Generate`: 생성 시작 (Primary Color)
-    - `Variations`: 디자인 변형 생성
-    - `Inpaint`: 마스킹 모드 진입
-    - `✨ Create Package`: **[Design Packaging Workshop]** 시작 (Primary-500)
-3.  **Inpaint Mode** (활성화 시):
-    - 캔버스 커서가 'Mask Brush'로 변경됨
-    - 패널에 'Brush Size' 슬라이더 표시
-    - 캔버스에 칠한 영역이 붉은색(반투명)으로 마스킹됨
-    - 버튼이 `Generate Fill`로 변경됨
-3.  **Selection Context** (세그멘테이션 선택 시):
-    - 선택된 파트 이름 표시 (예: "Selected: Outsole")
-    - **Hybrid Masking**:
-        - 파트 선택 상태에서 'Inpaint Mode'를 켜면, 선택된 영역이 마스크로 변환됨.
-        - 이후 브러시로 마스크 영역을 추가하거나 지우개로 다듬기(Refine) 가능.
-    - 프롬프트 입력 시 최종 마스킹된 영역에 부분 생성 수행.
+#### C. Action Section (Bottom)
+- **Inpaint/Generate Fill**: 현재 마스킹된 영역에 대해 생성 실행
+- **Variations**: 전체 변형 생성
 
 ---
 
@@ -342,5 +377,272 @@ AI가 분석한 이미지의 파트 정보를 표시하고 선택을 돕는 패�
 
 ---
 
-본 UI 스펙은 **Fabric.js** 라이브러리의 표준 기능을 기준으로 작성되었습니다.
+---
 
+## 7. 노드 기반 UI (Node-Based Interface)
+
+### 7.1 노드 타입별 시각적 구분
+
+#### Sketch 노드
+- **크기**: 768x768px 고정
+- **테두리**: 점선 (Dashed), Gray-300
+- **배경**: White with subtle grid pattern
+- **아이콘**: 좌상단에 연필 아이콘 배지
+
+#### Image 노드
+- **크기**: 768x768px 고정
+- **테두리**: 실선 (Solid), Gray-200
+- **배경**: 이미지로 채워짐
+- **배지**: 좌상단에 출처 표시
+  - 업로드: 📁 아이콘
+  - AI 생성: ✨ 아이콘
+  - Chat 가져오기: 💬 아이콘
+
+#### Text 노드
+- **크기**: 가변 (Auto-resize)
+- **테두리**: 없음 (선택 시만 표시)
+- **배경**: 투명
+- **스타일**: 기본 Inter 16px, Black
+
+### 7.2 노드 연결선 (Connection Lines)
+
+**시각화**:
+- **선 스타일**: 점선 (Dashed), Gray-400, 1px
+- **화살표**: 부모 → 자식 방향
+- **색상 변화**:
+  - 기본: Gray-400
+  - 호버: Primary-500
+  - 선택된 노드의 연결선: Primary-600, 2px
+
+**렌더링**:
+- SVG Path로 구현
+- 베지어 곡선 사용 (자연스러운 곡선)
+- Z-index: 노드 아래, 그리드 위
+
+**토글**:
+- Toolbar의 "Show Connections" 체크박스
+- 기본값: ON
+- OFF 시 모든 연결선 숨김
+
+### 7.3 AI Prompt Panel - Add Reference 기능
+
+**위치**: AI Prompt Panel 하단
+
+**UI 구성**:
+```
+┌─────────────────────────────────┐
+│ Prompt: [입력 영역]              │
+├─────────────────────────────────┤
+│ References (2)                  │
+│ ┌─────┐ ┌─────┐ [+ Add]        │
+│ │ 📁  │ │ ✨  │                │
+│ │Ref 1│ │Ref 2│                │
+│ └─────┘ └─────┘                │
+├─────────────────────────────────┤
+│ [Generate]                      │
+└─────────────────────────────────┘
+```
+
+**인터랙션**:
+1. "+ Add Reference" 버튼 클릭
+2. 캔버스 커서가 선택 모드로 변경
+3. 다른 노드 클릭 시 참조로 추가
+4. 참조 노드는 썸네일 + 타입 아이콘으로 표시
+5. X 버튼으로 참조 제거
+
+**제약**:
+- 최대 5개 참조 노드
+- 자기 자신은 참조 불가
+
+### 7.4 노드 최대 제한 경고
+
+**트리거**: 20개 노드 도달 시 새 노드 생성 시도
+
+**UI**:
+- 모달 또는 Toast 알림
+- 메시지: "캔버스당 최대 20개 노드까지 생성할 수 있습니다. 기존 노드를 삭제 후 다시 시도해주세요."
+- 버튼: "확인"
+
+**시각적 피드백**:
+- Toolbar의 Node Count가 빨간색으로 강조
+- 노드 생성 버튼들이 비활성화 (Disabled)
+
+### 7.5 노드 배치 규칙
+
+**새 노드 생성 시**:
+- Sketch/Text/Upload Image: 캔버스 중앙
+- AI 생성 이미지: 부모 노드 오른쪽 50px 간격
+
+**자동 배치 로직**:
+```typescript
+const placeGeneratedImage = (parentNode: Node) => {
+  return {
+    x: parentNode.x + parentNode.width + 50,
+    y: parentNode.y
+  };
+};
+```
+
+---
+
+## 7. 참고(Canvas 생성 및 관리 UI)
+
+### 7.1 CreateCanvasModal
+
+**트리거**: Home 페이지에서 "Sketch to Design" 버튼 클릭
+
+**위치**: 화면 중앙 모달 (Overlay)
+
+**크기**: 500px (width) × Auto (height)
+
+**구성**:
+
+#### Tab 1: New Canvas (기본 활성)
+- **Canvas Name Input**:
+  - Placeholder: "Untitled Canvas"
+  - Auto-focus on modal open
+  - Max length: 100자
+  
+- **Project Select** (Optional):
+  - Dropdown 형태
+  - 옵션:
+    - "None (Standalone)" (기본값)
+    - 사용자의 프로젝트 목록 (API에서 로드)
+  - 프로젝트 없을 경우 "No projects yet" 표시
+
+- **Create & Start Button**:
+  - Primary 버튼
+  - 클릭 시:
+    1. API 호출: `POST /canvas/projects`
+    2. 응답 받은 `canvas_id`로 `/canvas/{canvas_id}` 리다이렉트
+  - Loading state: "Creating..." + Spinner
+
+#### Tab 2: Recent Canvases
+- **Recent Canvas List**:
+  - 최근 5개 캔버스 표시
+  - 각 항목:
+    - 캔버스 이름
+    - 마지막 수정 시간 (relative time: "2 hours ago")
+    - 썸네일 (있는 경우, 40×40px)
+  - 클릭 시 해당 캔버스로 이동
+
+- **View All Canvases Link**:
+  - `/canvas` 페이지로 이동
+  - 텍스트: "View all canvases →"
+
+**스타일**:
+- Background: White
+- Border Radius: 16px
+- Shadow: `shadow-2xl`
+- Backdrop: `bg-black/50` (blur)
+
+**애니메이션**:
+- Enter: Fade in + Scale up (0.95 → 1.0)
+- Exit: Fade out + Scale down
+
+---
+
+### 7.2 CanvasListPage (캔버스 목록 페이지)
+
+**URL**: `/canvas`
+
+**레이아웃**: Standard Layout (Header + Main Content)
+
+**구성**:
+
+#### Page Header
+- **Title**: "My Canvases" (H1)
+- **Create Button**:
+  - Primary 버튼
+  - 텍스트: "+ New Canvas"
+  - 클릭 시 CreateCanvasModal 열기
+
+#### Filter Bar
+- **Search Input**:
+  - Placeholder: "Search canvases..."
+  - Icon: Search (Lucide)
+  - Debounce: 300ms
+
+- **Project Filter**:
+  - Dropdown
+  - 옵션:
+    - "All Projects"
+    - 사용자의 프로젝트 목록
+    - "Standalone Canvases"
+
+#### Canvas Grid
+- **레이아웃**: Grid (3 columns on desktop, 2 on tablet, 1 on mobile)
+- **Gap**: 24px
+
+**Canvas Card**:
+- **Thumbnail**:
+  - Aspect ratio: 16:9
+  - Background: Gray-100
+  - 썸네일 없을 경우: Placeholder icon (Canvas icon)
+  
+- **Info Section**:
+  - **Canvas Name**: 
+    - Font: 16px, Semi-bold
+    - Truncate: 1 line
+  - **Last Modified**:
+    - Font: 12px, Gray-500
+    - Format: "Updated 2 hours ago"
+  - **Project Badge** (있는 경우):
+    - Small badge
+    - Background: Primary-50
+    - Text: Primary-700
+
+- **Actions** (Hover 시 표시):
+  - **Open Button**: 기본 클릭 액션
+  - **Delete Button**:
+    - Icon: Trash
+    - 클릭 시 확인 모달 표시
+    - 모달 내용: "Are you sure you want to delete '{canvas_name}'?"
+  - **Duplicate Button** (Optional):
+    - Icon: Copy
+    - 클릭 시 복제 후 새 캔버스로 이동
+
+**Empty State**:
+- Icon: Canvas (large, Gray-300)
+- Text: "No canvases yet"
+- Subtext: "Create your first canvas to get started"
+- CTA Button: "Create Canvas"
+
+---
+
+### 7.3 Canvas Name Editor (TopToolbar 내)
+
+**위치**: TopToolbar 좌측 (도구 그룹 앞)
+
+**기본 상태**:
+- 캔버스 이름 표시
+- Font: 14px, Medium
+- Color: Gray-700
+- Max width: 200px
+- Truncate: 1 line with ellipsis
+
+**편집 모드**:
+- **트리거**: 이름 클릭
+- **UI 변화**:
+  - Input field로 전환
+  - Border: Primary-500
+  - Auto-select all text
+  - Auto-focus
+
+- **저장**:
+  - Enter 키 또는 Blur 시 자동 저장
+  - API 호출: `PUT /canvas/projects/{canvas_id}`
+  - Loading state: 없음 (Optimistic update)
+
+- **취소**:
+  - ESC 키로 취소
+  - 원래 이름으로 복원
+
+**Validation**:
+- 빈 이름 불가 (최소 1자)
+- 최대 100자
+- 에러 시 Input border를 Red로 변경
+
+---
+
+본 UI 스펙은 **Fabric.js** 라이브러리의 표준 기능을 기준으로 작성되었습니다.

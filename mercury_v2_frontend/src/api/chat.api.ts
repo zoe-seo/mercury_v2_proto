@@ -72,6 +72,7 @@ export const chatApi = {
       onMessageStart?: (data: { message_id: string; sequence_number: number }) => void;
       onContentDelta?: (data: { delta: string }) => void;
       onMessageComplete?: (data: { message_id: string; content: string }) => void;
+      onBriefRequest?: (data: { message_id: string; brief_data: any; is_required: boolean }) => void;
       onDone?: () => void;
       onError?: (error: Error) => void;
     },

@@ -230,16 +230,111 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 **Headers**: `Authorization: Bearer {token}`
 
-**Request Body**:
+**제약사항**:
+- 캔버스당 최대 20개 레이어
+- 노드 크기: 768x768px 고정 (sketch, image)
+- 이미지 업로드: 최대 10MB, 2048px
+
+**Request Body (타입별)**:
+
+#### sketch 타입
 ```json
 {
   "layer_type": "sketch",
   "layer_data": {
     "paths": [
-      {"d": "M 10 10 L 100 100", "stroke": "#000000", "stroke-width": 2}
-    ]
+      {"d": "M 10 10 L 100 100", "stroke": "#000000", "stroke-width": 2, "fill": "none"}
+    ],
+    "x": 100,
+    "y": 100,
+    "width": 768,
+    "height": 768,
+    "fabric_json": { /* Fabric.js Path Object */ }
+  },
+  "z_index": 1
+}
+```
+
+#### image 타입 (업로드)
+```json
+{
+  "layer_type": "image",
+  "layer_data": {
+    "image_url": "https://s3.amazonaws.com/bucket/images/abc123.png",
+    "source": "upload",
+    "x": 100,
+    "y": 100,
+    "width": 768,
+    "height": 768,
+    "scale_x": 1.0,
+    "scale_y": 1.0,
+    "rotation": 0,
+    "fabric_json": { /* Fabric.js Image Object */ }
+  },
+  "z_index": 2
+}
+```
+
+#### image 타입 (AI 생성)
+```json
+{
+  "layer_type": "image",
+  "layer_data": {
+    "image_url": "https://s3.amazonaws.com/bucket/generated/xyz789.png",
+    "source": "ai_generated",
+    "x": 150,  // 부모 노드 오른쪽 50px 간격
+    "y": 100,
+    "width": 768,
+    "height": 768,
+    "parent_layer_id": "layer-uuid-1",
+    "prompt": "고급스러운 가죽 소재, 브라운 컬러",
+    "generation_params": {
+      "strength": 0.7,
+      "steps": 50,
+      "guidance_scale": 7.5,
+      "model": "stable-diffusion-xl"
+    },
+    "reference_layer_ids": ["layer-uuid-2"],
+    "fabric_json": { /* Fabric.js Image Object */ }
   },
   "z_index": 3
+}
+```
+
+#### image 타입 (Chat 가져오기)
+```json
+{
+  "layer_type": "image",
+  "layer_data": {
+    "image_url": "https://s3.amazonaws.com/bucket/chat/msg-image.png",
+    "source": "chat_import",
+    "x": 100,
+    "y": 100,
+    "width": 768,
+    "height": 768,
+    "chat_message_id": "msg-uuid",
+    "fabric_json": { /* Fabric.js Image Object */ }
+  },
+  "z_index": 4
+}
+```
+
+#### text 타입
+```json
+{
+  "layer_type": "text",
+  "layer_data": {
+    "text": "디자인 의도: 빈티지 스타일 강조",
+    "x": 100,
+    "y": 100,
+    "font_family": "Inter",
+    "font_size": 16,
+    "fill": "#000000",
+    "width": 200,
+    "height": 50,
+    "fabric_json": { /* Fabric.js IText Object */ }
+  },
+  "z_index": 5
 }
 ```
 
@@ -252,7 +347,19 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
     "layer_data": { /* ... */ },
     "z_index": 3,
     "is_visible": true,
+    "is_locked": false,
+    "opacity": 1.0,
     "created_at": "2026-01-21T10:00:00Z"
+  }
+}
+```
+
+**Error** (400 - 최대 노드 제한):
+```json
+{
+  "error": {
+    "code": "MAX_LAYERS_EXCEEDED",
+    "message": "캔버스당 최대 20개 노드까지 생성할 수 있습니다."
   }
 }
 ```
@@ -309,7 +416,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 ```json
 {
   "layer_id": "layer-uuid-2",
-  "click_point": {"x": 250, "y": 300}
+  "click_point": {"x": 250, "y": 300} // Optional. If omitted, auto-detect all segments.
 }
 ```
 
@@ -338,7 +445,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 #### Processing Logic
 1.  **Validation**: `layer_id`가 현재 캔버스에 존재하고, 이미지 타입인지 확인
 2.  **Fetch**: S3에서 원본 이미지 다운로드
-3.  **External Call**: 외부 모델 서버에 이미지와 클릭 포인트 전송 (SAM 등)
+3.  **External Call**: 외부 모델 서버에 이미지와 클릭 포인트 전송 (SAM 등). 클릭 포인트가 없으면 Auto-Segment 모드로 요청.
 4.  **Cache (Mock)**: 현재는 Mock 데이터 반환
 5.  **Response (Mock)**: 미리 정의된 세그먼트 데이터 반환
 
@@ -380,7 +487,9 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 1.  **Validation**: `layer_ids`가 유효하고 현재 캔버스에 속하는지 확인
 2.  **Composition**: 선택된 레이어들을 Z-index 순서대로 병합하여 Base Image 생성
 3.  **Async Task**: `generate_sketch_to_image_task` Celery 작업 큐에 등록
-4.  **Integration**: 외부 이미지 생성 API (Stable Diffusion XL 등) 호출
+4.  **Integration**:
+    - **Prompt Injection**: 연결된 `Design Brief`가 있다면, `shoe_spec` 데이터를 프롬프트 앞단에 주입 (예: "Upper Material: Mesh, Color: Black...").
+    - 외부 이미지 생성 API (Stable Diffusion XL 등) 호출.
 5.  **Completion**: 생성된 이미지를 S3에 업로드하고 `generated` 타입의 새 레이어로 추가 후 작업 상태 업데이트
 
 ---

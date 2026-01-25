@@ -270,3 +270,75 @@ async def inpaint_image(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except ForbiddenException as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
+
+@router.get("/instances/{canvas_id}/brief")
+async def get_design_brief(
+    canvas_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get design brief for a canvas project."""
+    from app.services import design_brief_service
+    from app.schemas.design_brief import DesignBriefResponse
+    
+    try:
+        brief = await design_brief_service.get_canvas_brief(db, canvas_id, current_user.id)
+        return SuccessResponse(
+            data=DesignBriefResponse.model_validate(brief),
+            message="Success"
+        )
+    except NotFoundException as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.put("/instances/{canvas_id}/brief")
+async def upsert_design_brief(
+    canvas_id: uuid.UUID,
+    data: dict, # Using dict to allow local import of schema
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Upsert design brief for a canvas project."""
+    from app.services import design_brief_service
+    from app.schemas.design_brief import DesignBriefUpdate, DesignBriefResponse
+    
+    try:
+        update_data = DesignBriefUpdate(**data)
+        brief = await design_brief_service.upsert_canvas_brief(
+            db, canvas_id, current_user.id, update_data
+        )
+        return SuccessResponse(
+            data=DesignBriefResponse.model_validate(brief),
+            message="Success"
+        )
+    except ValueError:
+         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid data")
+    except NotFoundException as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.post("/instances/{canvas_id}/brief/sync")
+async def sync_brief_from_chat(
+    canvas_id: uuid.UUID,
+    data: dict, # Expects DesignBriefSync
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Sync brief from chat session to canvas."""
+    from app.services import design_brief_service
+    from app.schemas.design_brief import DesignBriefResponse, DesignBriefSync
+    
+    try:
+        sync_data = DesignBriefSync(**data)
+        brief = await design_brief_service.sync_brief_to_canvas(
+            db, canvas_id, sync_data.source_chat_session_id, current_user.id
+        )
+        return SuccessResponse(
+            data=DesignBriefResponse.model_validate(brief),
+            message="Success"
+        )
+    except ValueError:
+         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid data")
+    except NotFoundException as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

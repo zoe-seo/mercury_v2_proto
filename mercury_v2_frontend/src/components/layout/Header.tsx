@@ -29,7 +29,7 @@ export const Header = () => {
         
         {/* Left: Logo */}
         <div className="flex items-center w-[20%]">
-          <Link to="/" className="text-2xl font-heading font-bold text-gray-800 flex items-center gap-2">
+          <Link to="/" className="text-2xl font-heading font-bold text-[#14AE5C] flex items-center gap-2">
             <span>Mercury</span>
           </Link>
         </div>

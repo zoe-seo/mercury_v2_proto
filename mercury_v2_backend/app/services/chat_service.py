@@ -250,21 +250,97 @@ async def stream_message(
     # Collect full content while streaming
     full_content = ""
     
-    async def content_generator() -> AsyncGenerator[str, None]:
+    # SSE Generator Wrapper
+    async def sse_generator():
+        from app.core.sse import sse_event
         nonlocal full_content
+        
+        yield await sse_event("message_start", {
+            "message_id": str(assistant_message.id),
+            "sequence_number": assistant_message.sequence_number
+        })
+
+        buffer = ""
+        in_tag = False
+        
         async for delta in llm_stream:
-            full_content += delta
-            yield delta
-    
-    # Stream SSE events
-    async for sse_event in stream_sse_response(
-        str(assistant_message.id),
-        assistant_message.sequence_number,
-        content_generator()
-    ):
-        yield sse_event
+            buffer += delta
+            
+            if not in_tag:
+                if "<brief>" in buffer:
+                    prefix, rest = buffer.split("<brief>", 1)
+                    if prefix:
+                        full_content += prefix
+                        yield await sse_event("content_delta", {"delta": prefix})
+                    
+                    buffer = rest # Start accumulating brief
+                    in_tag = True
+                else:
+                    # Yield safe part
+                    # Keep last 6 chars in case they are part of <brief>
+                    if len(buffer) > 6:
+                        safe_chunk = buffer[:-6]
+                        buffer = buffer[-6:]
+                        full_content += safe_chunk
+                        yield await sse_event("content_delta", {"delta": safe_chunk})
+            
+            else:
+                # We are recording brief
+                if "</brief>" in buffer:
+                    brief_str, suffix = buffer.split("</brief>", 1)
+                    
+                    # Process Brief (Don't yield content)
+                    import json
+                    try:
+                        brief_data = json.loads(brief_str)
+                        yield await sse_event("brief_request", {
+                            "message_id": str(assistant_message.id),
+                            "brief_data": brief_data,
+                            "is_required": True
+                        })
+                        assistant_message.message_metadata = {"brief_request": {"brief_data": brief_data}}
+                    except:
+                        # Parse failed, treat as text
+                        fallback = f"<brief>{brief_str}</brief>"
+                        full_content += fallback
+                        yield await sse_event("content_delta", {"delta": fallback})
+                    
+                    # Handle suffix
+                    buffer = suffix
+                    in_tag = False
+                    
+                    # If suffix has more content, next loop will handle or flush at end
+                    if buffer:
+                        full_content += buffer
+                        yield await sse_event("content_delta", {"delta": buffer})
+                        buffer = ""
+                else:
+                    # Keep buffering brief
+                    pass
+
+        # Flush remaining
+        if buffer:
+            if in_tag:
+                # Incomplete tag at end of stream? Just output it.
+                fallback = f"<brief>{buffer}"
+                full_content += fallback
+                yield await sse_event("content_delta", {"delta": fallback})
+            else:
+                full_content += buffer
+                yield await sse_event("content_delta", {"delta": buffer})
+
+        yield await sse_event("message_complete", {
+            "message_id": str(assistant_message.id),
+            "content": full_content
+        })
+        
+        yield await sse_event("done", {})
+
+    async for sse_chunk in sse_generator():
+        yield sse_chunk
     
     # Update assistant message with full content
     assistant_message.content = full_content
+    # Flag to commit metadata update if happened
     await db.commit()
 

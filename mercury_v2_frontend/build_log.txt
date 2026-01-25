@@ -1,0 +1,30 @@
+
+> mercury_v2_frontend@0.0.0 build
+> tsc -b && vite build
+
+src/api/canvas.api.ts(3,3): error TS2305: Module '"../types/api/canvas"' has no exported member 'CanvasProject'.
+src/components/canvas/ContextToolbar.tsx(19,5): error TS6133: 'brushSettings' is declared but its value is never read.
+src/components/canvas/ContextToolbar.tsx(20,5): error TS6133: 'setBrushColor' is declared but its value is never read.
+src/components/canvas/ContextToolbar.tsx(21,5): error TS6133: 'setBrushSize' is declared but its value is never read.
+src/components/canvas/ContextToolbar.tsx(92,9): error TS6133: 'isImage' is declared but its value is never read.
+src/components/canvas/DesignPackagingWorkshop.tsx(33,10): error TS6133: 'packageId' is declared but its value is never read.
+src/components/canvas/ImageContextPanel.tsx(139,9): error TS6133: 'PANEL_WIDTH' is declared but its value is never read.
+src/components/canvas/ImageContextPanel.tsx(140,9): error TS6133: 'PANEL_HEIGHT' is declared but its value is never read.
+src/components/canvas/LayerPanel.tsx(151,22): error TS2339: Property 'name' does not exist on type 'CanvasLayer'.
+  Property 'name' does not exist on type 'SketchLayer'.
+src/components/canvas/TopToolbar.tsx(51,3): error TS6133: 'onExport' is declared but its value is never read.
+src/components/common/Tooltip.tsx(19,3): error TS6133: 'align' is declared but its value is never read.
+src/components/workshop/DesignPackageModal.tsx(3,23): error TS6133: 'Check' is declared but its value is never read.
+src/components/workshop/DesignPackageModal.tsx(23,3): error TS6133: 'canvasId' is declared but its value is never read.
+src/components/workshop/steps/FinalizeStep.tsx(12,29): error TS6133: 'isPending' is declared but its value is never read.
+src/components/workshop/steps/FinalizeStep.tsx(51,24): error TS2322: Type '"outline"' is not assignable to type '"primary" | "secondary" | "ghost" | "icon" | undefined'.
+src/components/workshop/steps/FinalizeStep.tsx(54,24): error TS2322: Type '"outline"' is not assignable to type '"primary" | "secondary" | "ghost" | "icon" | undefined'.
+src/components/workshop/steps/ProductionStep.tsx(2,1): error TS6133: 'motion' is declared but its value is never read.
+src/components/workshop/steps/ProductionStep.tsx(6,15): error TS6196: 'AssetType' is declared but never used.
+src/components/workshop/steps/ProductionStep.tsx(15,25): error TS6133: 'isLoading' is declared but its value is never read.
+src/components/workshop/steps/ProductionStep.tsx(16,39): error TS6133: 'isStarting2D' is declared but its value is never read.
+src/components/workshop/steps/ProductionStep.tsx(160,11): error TS6133: 'isPending' is declared but its value is never read.
+src/hooks/useFabricCanvas.ts(409,25): error TS6133: 'err' is declared but its value is never read.
+src/pages/CanvasPage.tsx(17,44): error TS6196: 'ShapeType' is declared but never used.
+src/queries/useDesignPackage.ts(2,1): error TS6133: 'axios' is declared but its value is never read.
+src/utils/keyboardShortcuts.ts(3,6): error TS6196: 'KeyHandler' is declared but never used.

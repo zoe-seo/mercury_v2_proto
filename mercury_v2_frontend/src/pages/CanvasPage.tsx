@@ -6,20 +6,21 @@ import { CanvasBoard } from '../components/canvas/CanvasBoard';
 import { TopToolbar } from '../components/canvas/TopToolbar';
 import { PropertiesPanel } from '../components/canvas/PropertiesPanel';
 import { LayerPanel } from '../components/canvas/LayerPanel';
-import { SegmentsPanel } from '../components/canvas/SegmentsPanel';
-import { AIPromptPanel } from '../components/canvas/AIPromptPanel';
-import { DesignPackagingWorkshop } from '../components/canvas/DesignPackagingWorkshop';
+import { ImageContextPanel } from '../components/canvas/ImageContextPanel';
+import { SpecSidePanel } from '../components/canvas/SpecSidePanel';
+import { DesignPackageModal } from '../components/workshop/DesignPackageModal';
 import { useFabricCanvas } from '../hooks/useFabricCanvas';
 import { useCanvasStore } from '../store/canvasStore';
-import { useCanvasProject } from '../queries/useCanvas';
+import { useCanvasProject, useUpdateCanvasProject } from '../queries/useCanvas';
 import { useKeyboardShortcuts, createCanvasShortcuts } from '../utils/keyboardShortcuts';
 import { layerDataToFabricObject, loadImageFromUrl } from '../utils/fabricUtils';
+import type { CanvasLayer, ImageLayerData } from '../types/api/canvas';
 
 export const CanvasPage = () => {
   const { canvasId } = useParams<{ canvasId: string }>();
   const navigate = useNavigate();
 
-  // canvasId가 없으면 홈으로 리다이렉트
+  // Redirect if no canvasId
   useEffect(() => {
     if (!canvasId) {
       navigate('/');
@@ -28,12 +29,13 @@ export const CanvasPage = () => {
 
   const {
     fabricCanvasRef,
+    initCanvas,
     activeTool,
     setActiveTool,
     canvasState,
     setZoom,
-    addShape,
     addText,
+    addSketchNode,
     addImageFromFile,
     deleteSelected,
     duplicateSelected,
@@ -54,28 +56,58 @@ export const CanvasPage = () => {
 
   const [isAIPanelOpen, setIsAIPanelOpen] = useState(false);
   const [isWorkshopOpen, setIsWorkshopOpen] = useState(false);
+  const [aiPanelPosition, setAIPanelPosition] = useState<{ x: number; y: number } | undefined>(undefined);
+
+  // Calculate AI Panel position based on selected object
+  useEffect(() => {
+    if (selectedObjectId && fabricCanvasRef.current && isAIPanelOpen) {
+      const canvas = fabricCanvasRef.current;
+      const activeObject = canvas.getActiveObject();
+      
+      if (activeObject) {
+        // Get object bounds in canvas coordinates
+        const bounds = activeObject.getBoundingRect();
+        const zoom = canvas.getZoom();
+        
+        // Convert to viewport coordinates
+        const vpt = canvas.viewportTransform;
+        if (vpt) {
+          const x = bounds.left * zoom + vpt[4] + bounds.width * zoom / 2;
+          const y = bounds.top * zoom + vpt[5] + bounds.height * zoom;
+          
+          setAIPanelPosition({ x, y });
+        }
+      }
+    } else {
+      setAIPanelPosition(undefined);
+    }
+  }, [selectedObjectId, fabricCanvasRef, isAIPanelOpen]);
 
   // Load canvas project data
   const { data: projectData, isLoading } = useCanvasProject(canvasId);
+  const { mutate: updateProject } = useUpdateCanvasProject();
 
   // Load layers into canvas when project data is fetched
   useEffect(() => {
     if (projectData && fabricCanvasRef.current && projectData.layers) {
       const canvas = fabricCanvasRef.current;
       canvas.clear();
+      // Set bg color explicitly
+      canvas.backgroundColor = '#FAFAFA';
 
       // Set layers in store
       setLayers(projectData.layers);
 
       // Load layers into Fabric canvas
-      projectData.layers.forEach(async (layer) => {
-        if (layer.layer_type === 'image' || layer.layer_type === 'generated') {
+      projectData.layers.forEach(async (layer: CanvasLayer) => {
+        if (layer.layer_type === 'image' || ((layer as any).layer_type === 'generated')) {
           // Load image asynchronously
-          if (layer.layer_data.image_url) {
+          const layerData = layer.layer_data as ImageLayerData;
+          if (layerData.image_url) {
             try {
-              const img = await loadImageFromUrl(layer.layer_data.image_url, {
-                left: layer.layer_data.x || 0,
-                top: layer.layer_data.y || 0,
+              const img = await loadImageFromUrl(layerData.image_url, {
+                left: layerData.x || 0,
+                top: layerData.y || 0,
                 selectable: !layer.is_locked,
                 evented: !layer.is_locked,
                 opacity: layer.opacity || 1,
@@ -89,6 +121,7 @@ export const CanvasPage = () => {
             }
           }
         } else {
+          // Sketch or Text
           const fabricObj = layerDataToFabricObject(layer);
           if (fabricObj) {
             canvas.add(fabricObj);
@@ -104,7 +137,7 @@ export const CanvasPage = () => {
   useEffect(() => {
     if (selectedObjectId) {
       const layer = layers.find((l) => l.id === selectedObjectId);
-      if (layer && (layer.layer_type === 'image' || layer.layer_type === 'generated')) {
+      if (layer && (layer.layer_type === 'image' || (layer as any).layer_type === 'generated')) {
         setIsAIPanelOpen(true);
       } else {
         setIsAIPanelOpen(false);
@@ -114,6 +147,30 @@ export const CanvasPage = () => {
     }
   }, [selectedObjectId, layers]);
 
+  // Sync canvas with layers (Deletion handling)
+  useEffect(() => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas) return;
+
+    const currentObjects = canvas.getObjects();
+    const currentLayerIds = new Set(layers.map(l => l.id));
+
+    let removed = false;
+    currentObjects.forEach((obj) => {
+      const layerId = (obj as any).layerId;
+      // Only remove objects that have a layerId (managed objects) AND are not in current layers
+      if (layerId && !currentLayerIds.has(layerId)) {
+        console.log('Syncing deletion: removing object', layerId);
+        canvas.remove(obj);
+        removed = true;
+      }
+    });
+
+    if (removed) {
+      canvas.requestRenderAll();
+    }
+  }, [layers, fabricCanvasRef]);
+
   // Keyboard shortcuts
   useKeyboardShortcuts(
     createCanvasShortcuts({
@@ -121,8 +178,13 @@ export const CanvasPage = () => {
       onHandTool: () => setActiveTool('hand'),
       onBrushTool: () => setActiveTool('brush'),
       onEraserTool: () => setActiveTool('eraser'),
+      // Shape tool removed from shortcuts as it's not in main toolbar? 
+      // Or map 'R' to addSketchNode? Spec says 'R' is Rectangle..
+      // We'll keep default mappings or adjust if needed.
       onShapeTool: () => {
-        addShape('rect');
+         // Maybe add generic shape if needed, or map to sketch node?
+         // For now keeping usage of addShape('rect') if user presses R
+        // addShape('rect'); // Shape tool shortcut removed (legacy / unused)
         setActiveTool('select');
       },
       onTextTool: () => {
@@ -166,6 +228,12 @@ export const CanvasPage = () => {
     }
   };
 
+  const handleRename = (newName: string) => {
+    if (canvasId) {
+      updateProject({ canvasId, data: { name: newName } });
+    }
+  };
+
   if (isLoading) {
     return (
       <Layout className="h-screen overflow-hidden">
@@ -174,6 +242,16 @@ export const CanvasPage = () => {
         </div>
       </Layout>
     );
+  }
+
+  const selectedLayer = layers.find(l => l.id === selectedObjectId);
+  let initialImage = '';
+  if (selectedLayer) {
+     if (selectedLayer.layer_type === 'image') {
+         initialImage = (selectedLayer.layer_data as ImageLayerData).image_url || '';
+     } else if ((selectedLayer as any).layer_type === 'generated') {
+         initialImage = (selectedLayer.layer_data as any).image_url || '';
+     }
   }
 
   return (
@@ -188,7 +266,11 @@ export const CanvasPage = () => {
       />
       <CanvasLayout>
         {/* Main Board */}
-        <CanvasBoard canvasId={canvasId} />
+        <CanvasBoard 
+          initCanvas={initCanvas}
+          fabricCanvasRef={fabricCanvasRef}
+          canvasState={canvasState}
+        />
 
         {/* Floating Toolbar */}
         <TopToolbar
@@ -216,6 +298,14 @@ export const CanvasPage = () => {
           }}
           onExport={() => console.log('Export')}
           savingState={savingState}
+          
+          // New Props
+          canvasName={projectData?.name}
+          onRename={handleRename}
+          nodeCount={layers.length}
+          onAddSketchNode={addSketchNode}
+          onAddTextNode={addText}
+          onUploadImage={() => fileInputRef.current?.click()}
         />
 
         {/* Context Panels */}
@@ -227,29 +317,29 @@ export const CanvasPage = () => {
 
         {/* Right Side Panels */}
         <LayerPanel canvasId={canvasId} />
-        <SegmentsPanel
-          canvasId={canvasId}
-          onSegmentClick={(id) => {
-            console.log('Selected segment:', id);
-            setIsAIPanelOpen(true);
-          }}
+
+        {/* Left Side Panel - Design Brief */}
+        <SpecSidePanel 
+          canvasId={canvasId} 
+          isOpen={true} // Always open for now, or use state
         />
 
-        {/* AI Popup */}
-        <AIPromptPanel
+        {/* Unified Image Context Panel */}
+        <ImageContextPanel
           canvasId={canvasId}
           isOpen={isAIPanelOpen}
           onClose={() => setIsAIPanelOpen(false)}
           onCreatePackage={() => setIsWorkshopOpen(true)}
-          position={{ x: window.innerWidth / 2, y: window.innerHeight - 200 }}
+          position={aiPanelPosition}
+          selectedObjectId={selectedObjectId || undefined}
         />
 
         {/* Design Packaging Workshop Modal */}
-        <DesignPackagingWorkshop
+        <DesignPackageModal
           isOpen={isWorkshopOpen}
           onClose={() => setIsWorkshopOpen(false)}
-          canvasId={canvasId}
-          selectedImageId={selectedObjectId || undefined}
+          canvasId={canvasId!}
+          initialImage={initialImage}
         />
       </CanvasLayout>
     </Layout>

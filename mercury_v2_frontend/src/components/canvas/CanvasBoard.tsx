@@ -1,14 +1,16 @@
 import { useEffect, useRef } from 'react';
-import { useFabricCanvas } from '../../hooks/useFabricCanvas';
+import * as fabric from 'fabric';
 import { useCanvasStore } from '../../store/canvasStore';
+import { ContextToolbar } from './ContextToolbar';
 
 interface CanvasBoardProps {
-  canvasId: string | undefined;
+  initCanvas: (element: HTMLCanvasElement) => (() => void) | undefined;
+  fabricCanvasRef: React.RefObject<fabric.Canvas | null>;
+  canvasState: { scale: number; offset: { x: number; y: number } };
 }
 
-export const CanvasBoard = ({ canvasId }: CanvasBoardProps) => {
+export const CanvasBoard = ({ initCanvas, fabricCanvasRef, canvasState }: CanvasBoardProps) => {
   const canvasElementRef = useRef<HTMLCanvasElement>(null);
-  const { initCanvas, fabricCanvasRef, canvasState } = useFabricCanvas(canvasId);
   const { savingState } = useCanvasStore();
 
   // Initialize Fabric Canvas
@@ -24,8 +26,10 @@ export const CanvasBoard = ({ canvasId }: CanvasBoardProps) => {
     const handleResize = () => {
       const canvas = fabricCanvasRef.current;
       if (canvas) {
-        canvas.setWidth(window.innerWidth);
-        canvas.setHeight(window.innerHeight);
+        canvas.setDimensions({
+          width: window.innerWidth,
+          height: window.innerHeight
+        });
         canvas.renderAll();
       }
     };
@@ -38,6 +42,9 @@ export const CanvasBoard = ({ canvasId }: CanvasBoardProps) => {
     <div className="absolute inset-0 z-0 overflow-hidden bg-gray-50">
       {/* Fabric Canvas */}
       <canvas ref={canvasElementRef} />
+
+      {/* Context Toolbar (Floating) */}
+      <ContextToolbar canvas={fabricCanvasRef.current} />
 
       {/* HUD - Zoom and Position Info */}
       <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur px-3 py-2 rounded-lg text-xs text-gray-500 pointer-events-none border border-gray-100 shadow-sm flex items-center gap-3">
