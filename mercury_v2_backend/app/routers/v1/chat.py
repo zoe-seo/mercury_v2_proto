@@ -119,6 +119,32 @@ async def update_session(
         )
 
 
+@router.delete("/sessions/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_session(
+    session_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Delete (archive) a chat session."""
+    try:
+        import uuid as uuid_lib
+        session_uuid = uuid_lib.UUID(session_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid session ID format"
+        )
+    
+    try:
+        await chat_service.delete_session(db, session_uuid, current_user.id)
+        return None
+    except NotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+
+
 @router.get("/sessions/{session_id}/messages", response_model=ChatMessageListResponse)
 async def get_messages(
     session_id: str,

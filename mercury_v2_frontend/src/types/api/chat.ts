@@ -32,3 +32,22 @@ export interface ChatMessage {
   created_at: string;
   sequence_number: number;
 }
+
+export interface SendMessageRequest {
+  content: string;
+  metadata?: Record<string, any>;
+}
+
+export interface SSEMessageStartEvent {
+  message_id: string;
+  sequence_number: number;
+}
+
+export interface SSEContentDeltaEvent {
+  delta: string;
+}
+
+export interface SSEMessageCompleteEvent {
+  message_id: string;
+  content: string;
+}

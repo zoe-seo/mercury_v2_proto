@@ -10,7 +10,8 @@ export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
           queries: {
             staleTime: 1000 * 60 * 5, // 5 minutes
             retry: 1,
-            refetchOnWindowFocus: false, // Prevent intrusive refetches dev mode
+            refetchOnWindowFocus: false, // Prevent intrusive refetches in dev mode
+            refetchOnMount: true, // 컴포넌트 마운트 시 데이터 새로 가져오기
           },
         },
       })

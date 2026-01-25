@@ -1,14 +1,51 @@
-import { Plus, Search, MoreVertical } from 'lucide-react';
+import { Plus, Search, MoreVertical, Trash2 } from 'lucide-react';
 import { Button } from '../common/Button';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { cn } from '../../utils/cn';
-import { useChatSessions } from '@/queries/useChat';
+import { useChatSessions, useDeleteChatSession } from '@/queries/useChat';
+import { useState, useEffect } from 'react';
 
 export const SessionListPanel = () => {
   const { sessionId } = useParams();
+  const navigate = useNavigate();
   const { data: sessionsData, isLoading } = useChatSessions();
+  const { mutate: deleteSession } = useDeleteChatSession();
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   
-  const sessions = sessionsData?.items || [];
+  // 디버깅: 세션 데이터 확인
+  console.log('SessionListPanel - sessionsData:', sessionsData);
+  console.log('SessionListPanel - isLoading:', isLoading);
+  
+  // 세션 목록을 최신순으로 정렬 (updated_at 기준 내림차순)
+  const sessions = (sessionsData?.items || []).sort((a, b) => 
+    new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  );
+
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = () => setOpenMenuId(null);
+    if (openMenuId) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [openMenuId]);
+
+  const handleDelete = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (confirm('이 대화를 삭제하시겠습니까?')) {
+      deleteSession(id, {
+        onSuccess: () => {
+          setOpenMenuId(null);
+          // 현재 보고 있는 세션을 삭제한 경우 홈으로 이동
+          if (sessionId === id) {
+            navigate('/chats');
+          }
+        }
+      });
+    }
+  };
 
   return (
     <>
@@ -47,31 +84,53 @@ export const SessionListPanel = () => {
             });
             
             return (
-              <Link to={`/chats/${session.id}`} key={session.id}>
-                <div 
-                  className={cn(
-                    "p-3 rounded-lg cursor-pointer transition-colors group relative",
-                    isActive 
-                      ? "bg-white shadow-sm border border-gray-100" 
-                      : "hover:bg-gray-100/50"
-                  )}
-                >
-                  <div className="flex justify-between items-start mb-1">
-                    <h3 className={cn("text-sm font-medium truncate pr-2", isActive ? "text-primary-700" : "text-gray-700")}>
+              <div key={session.id} className="relative">
+                <Link to={`/chats/${session.id}`}>
+                  <div 
+                    className={cn(
+                      "p-3 rounded-lg cursor-pointer transition-colors group relative",
+                      isActive 
+                        ? "bg-white shadow-sm border border-gray-100" 
+                        : "hover:bg-gray-100/50"
+                    )}
+                  >
+                    <div className="flex justify-between items-start mb-1">
+                      <h3 className={cn("text-sm font-medium truncate pr-2", isActive ? "text-primary-700" : "text-gray-700")}>
+                        {session.title}
+                      </h3>
+                      <span className="text-[10px] text-gray-400 flex-shrink-0">{updatedAt}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 truncate pr-6">
                       {session.title}
-                    </h3>
-                    <span className="text-[10px] text-gray-400 flex-shrink-0">{updatedAt}</span>
+                    </p>
+                    
+                    {/* Context Menu Trigger */}
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setOpenMenuId(openMenuId === session.id ? null : session.id);
+                      }}
+                      className="absolute right-2 bottom-3 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-opacity z-10"
+                    >
+                      <MoreVertical size={14} />
+                    </button>
                   </div>
-                  <p className="text-xs text-gray-500 truncate pr-6">
-                    {session.title}
-                  </p>
-                  
-                  {/* Context Menu Trigger (Visible on Hover) */}
-                  <button className="absolute right-2 bottom-3 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-opacity">
-                    <MoreVertical size={14} />
-                  </button>
-                </div>
-              </Link>
+                </Link>
+                
+                {/* Dropdown Menu */}
+                {openMenuId === session.id && (
+                  <div className="absolute right-2 top-12 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[120px]">
+                    <button
+                      onClick={(e) => handleDelete(session.id, e)}
+                      className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                    >
+                      <Trash2 size={14} />
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
             );
           })
         )}

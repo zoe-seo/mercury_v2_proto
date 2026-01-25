@@ -18,6 +18,9 @@ async def get_sessions(
     page_size: int = 20
 ) -> tuple[list[ChatSession], PaginationMeta]:
     """Get user's chat sessions with pagination and optional project filter."""
+    import logging
+    logger = logging.getLogger(__name__)
+    
     # Validate pagination params
     page = max(1, page)
     page_size = min(max(1, page_size), 100)
@@ -27,9 +30,13 @@ async def get_sessions(
     if project_id:
         query_filter.append(ChatSession.project_id == project_id)
     
+    logger.info(f"🔍 Getting sessions for user_id: {user_id}, project_id: {project_id}")
+    
     # Count total items
     count_query = select(func.count()).select_from(ChatSession).where(*query_filter)
     total_items = await db.scalar(count_query) or 0
+    
+    logger.info(f"📊 Total sessions found: {total_items}")
     
     # Calculate pagination
     total_pages = math.ceil(total_items / page_size) if total_items > 0 else 1
@@ -45,6 +52,8 @@ async def get_sessions(
     )
     result = await db.execute(query)
     sessions = list(result.scalars().all())
+    
+    logger.info(f"✅ Returning {len(sessions)} sessions")
     
     pagination = PaginationMeta(
         page=page,
@@ -81,6 +90,11 @@ async def create_session(
     data: ChatSessionCreate
 ) -> ChatSession:
     """Create a new chat session."""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"🆕 Creating session for user_id: {user_id}, title: {data.title}")
+    
     session = ChatSession(
         user_id=user_id,
         project_id=data.project_id,
@@ -91,6 +105,9 @@ async def create_session(
     db.add(session)
     await db.commit()
     await db.refresh(session)
+    
+    logger.info(f"✅ Session created: {session.id}")
+    
     return session
 
 
@@ -110,6 +127,28 @@ async def update_session(
     await db.commit()
     await db.refresh(session)
     return session
+
+
+async def delete_session(
+    db: AsyncSession,
+    session_id: uuid.UUID,
+    user_id: uuid.UUID
+) -> None:
+    """Delete (archive) a chat session."""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    session = await get_session_by_id(db, session_id, user_id)
+    
+    logger.info(f"🗑️ Archiving session: {session_id}")
+    
+    # Soft delete - set is_archived to True
+    session.is_archived = True
+    
+    await db.commit()
+    
+    logger.info(f"✅ Session archived: {session_id}")
+
 
 
 async def get_messages(

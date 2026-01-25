@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
 import type { ChatMessage } from '@/types/api/chat';
+import { useSendMessage } from '@/queries/useChat';
 
 interface ChatAreaProps {
   sessionId?: string;
@@ -16,13 +18,32 @@ export const ChatArea = ({
   isCreatingSession = false,
   onFirstMessage 
 }: ChatAreaProps) => {
+  const location = useLocation();
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>(messages);
   const [isTyping, setIsTyping] = useState(false);
+  const [streamingContent, setStreamingContent] = useState('');
+  const [currentMessageId, setCurrentMessageId] = useState<string | null>(null);
+  const hasAutoSentRef = useRef(false);
+  
+  const { sendMessage } = useSendMessage();
 
   // Update local messages when prop changes
   useEffect(() => {
     setLocalMessages(messages);
   }, [messages]);
+
+  // 세션 생성 직후 첫 메시지 자동 전송
+  useEffect(() => {
+    const firstMessage = (location.state as any)?.firstMessage;
+    
+    if (sessionId && firstMessage && !hasAutoSentRef.current) {
+      hasAutoSentRef.current = true;
+      // 약간의 딜레이 후 메시지 전송 (세션이 완전히 생성되도록)
+      setTimeout(() => {
+        handleSendMessage(firstMessage);
+      }, 100);
+    }
+  }, [sessionId, location.state]);
 
   const handleSendMessage = async (content: string) => {
     // 세션이 없으면 첫 메시지로 세션 생성
@@ -31,33 +52,77 @@ export const ChatArea = ({
       return;
     }
 
-    // 기존 세션에 메시지 추가 (임시 로컬 상태)
-    const newMessage: ChatMessage = {
-      id: Date.now().toString(),
+    if (!sessionId) {
+      console.error('No session ID available');
+      return;
+    }
+
+    // 사용자 메시지를 로컬 상태에 추가
+    const userMessage: ChatMessage = {
+      id: `temp-user-${Date.now()}`,
       role: 'user',
       content,
       created_at: new Date().toISOString(),
       sequence_number: localMessages.length + 1,
     };
 
-    setLocalMessages((prev) => [...prev, newMessage]);
+    setLocalMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
+    setStreamingContent('');
+    setCurrentMessageId(null);
 
-    // TODO: 실제 API 호출로 메시지 전송
-    // await sendMessage(sessionId, content);
-
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: `I received your request: "${content}". This is a simulated response.`,
-        created_at: new Date().toISOString(),
-        sequence_number: localMessages.length + 2,
-      };
-      setLocalMessages((prev) => [...prev, aiResponse]);
-      setIsTyping(false);
-    }, 1500);
+    // SSE 스트리밍으로 메시지 전송
+    await sendMessage(
+      sessionId,
+      content,
+      {
+        onMessageStart: (data) => {
+          console.log('Message started:', data);
+          setCurrentMessageId(data.message_id);
+          setStreamingContent('');
+        },
+        onContentDelta: (data) => {
+          // 스트리밍 중인 내용을 누적
+          setStreamingContent((prev) => prev + data.delta);
+        },
+        onMessageComplete: (data) => {
+          console.log('Message completed:', data);
+          
+          // 완성된 AI 메시지를 로컬 상태에 추가
+          const aiMessage: ChatMessage = {
+            id: data.message_id,
+            role: 'assistant',
+            content: data.content,
+            created_at: new Date().toISOString(),
+            sequence_number: localMessages.length + 2,
+          };
+          
+          setLocalMessages((prev) => [...prev, aiMessage]);
+          setStreamingContent('');
+          setCurrentMessageId(null);
+        },
+        onDone: () => {
+          console.log('Stream done');
+          setIsTyping(false);
+        },
+        onError: (error) => {
+          console.error('Stream error:', error);
+          setIsTyping(false);
+          setStreamingContent('');
+          setCurrentMessageId(null);
+          
+          // 에러 메시지 표시
+          const errorMessage: ChatMessage = {
+            id: `error-${Date.now()}`,
+            role: 'assistant',
+            content: `죄송합니다. 메시지 전송 중 오류가 발생했습니다: ${error.message}`,
+            created_at: new Date().toISOString(),
+            sequence_number: localMessages.length + 2,
+          };
+          setLocalMessages((prev) => [...prev, errorMessage]);
+        },
+      }
+    );
   };
 
   // Empty State (세션이 없을 때)
@@ -106,9 +171,21 @@ export const ChatArea = ({
     );
   }
 
+  // 스트리밍 중인 메시지를 포함한 전체 메시지 목록
+  const displayMessages = [...localMessages];
+  if (streamingContent && currentMessageId) {
+    displayMessages.push({
+      id: currentMessageId,
+      role: 'assistant',
+      content: streamingContent,
+      created_at: new Date().toISOString(),
+      sequence_number: localMessages.length + 1,
+    });
+  }
+
   return (
     <div className="flex flex-col h-full">
-      <MessageList messages={localMessages} isTyping={isTyping} />
+      <MessageList messages={displayMessages} isTyping={isTyping && !streamingContent} />
       <ChatInput 
         onSendMessage={handleSendMessage} 
         disabled={isTyping || isCreatingSession} 
@@ -116,3 +193,4 @@ export const ChatArea = ({
     </div>
   );
 };
+
