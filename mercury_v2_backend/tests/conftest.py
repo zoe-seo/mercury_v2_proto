@@ -9,7 +9,7 @@ from app.main import app
 from app.deps.db import get_db
 
 # Test database URL
-TEST_DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/mercury_v2_test"
+TEST_DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5433/mercury_v2_test"
 
 
 @pytest_asyncio.fixture(scope="function")
@@ -52,3 +52,26 @@ async def client(test_db):
         yield ac
     
     app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture(scope="function")
+async def auth_headers(client):
+    """Create authenticated user and return auth headers."""
+    # Create a test user
+    response = await client.post(
+        "/api/v1/auth/signup",
+        json={
+            "email": "testuser@example.com",
+            "password": "testpassword123",
+            "name": "Test User"
+        }
+    )
+    
+    # Extract token from response
+    data = response.json()
+    if "data" in data:
+        token = data["data"]["access_token"]
+    else:
+        token = data["access_token"]
+    
+    return {"Authorization": f"Bearer {token}"}

@@ -296,6 +296,8 @@ example.com {
 | ADR-009 | JSONB 인덱스 필요 시 추가 | 승인됨 |
 | ADR-010 | HTTP/2 인프라 | 승인됨 |
 | ADR-011 | LiteLLM (LLM 통합) | 승인됨 |
+| ADR-012 | Packaging Workshop 다단계 파이프라인 | 승인됨 |
+| ADR-013 | 문서 구조 재편성 (BE/FE 분리) | 승인됨 |
 
 ---
 
@@ -340,3 +342,64 @@ response = await litellm.acompletion(
 ### 대안
 - **openai**: OpenAI 전용, 다른 제공자로 전환 시 코드 전면 수정 필요
 - **langchain**: 복잡한 워크플로우에 적합하지만 단순 채팅에는 과함
+
+---
+
+## ADR-012: Packaging Workshop 다단계 파이프라인
+
+**날짜**: 2026-01-24  
+**상태**: 승인됨  
+**결정자**: 시스템 아키텍트
+
+### 컨텍스트
+Design Package를 생성한 후 프로덕션 에셋(6-view shots, model shot, 3D model)을 생성하는 워크플로우가 필요합니다. 사용자가 각 단계를 검토하고 재시도할 수 있어야 합니다.
+
+### 결정
+**다단계 파이프라인 아키텍처**를 채택하여 2D 생성 → 검토/재시도 → 3D 생성 → 확정의 순차적 워크플로우를 구현합니다.
+
+### 근거
+- **사용자 제어**: 각 단계에서 결과를 검토하고 재생성 가능
+- **리소스 효율성**: 2D 결과가 만족스럽지 않으면 3D 생성을 건너뛸 수 있음
+- **명확한 진행 상태**: 각 단계별 독립적인 상태 관리
+- **재시도 메커니즘**: 개별 에셋 단위로 최대 3회 재생성 가능
+
+### API 설계
+```
+1. POST /design-packages/{id}/production/2d
+   → 7개 에셋 병렬 생성 (6-view + model shot)
+   
+2. POST /design-packages/{id}/production/2d/retry
+   → 특정 에셋 재생성 (예: "6view_front")
+   
+3. POST /design-packages/{id}/production/3d
+   → 6-view 이미지를 입력으로 3D 재구성
+   
+4. GET /design-packages/{id}/production/status
+   → 실시간 진행 상태 모니터링
+   
+5. POST /design-packages/{id}/finalize
+   → 패키지 확정 및 갤러리 전송
+```
+
+### 데이터베이스 설계
+**`design_packages.status` 필드**:
+- `draft`: 초기 생성 상태
+- `partial`: 일부 에셋 생성 중
+- `2d_completed`: 모든 2D 에셋 완료
+- `3d_completed`: 3D 에셋 완료
+- `completed`: 최종 확정
+
+**`production_assets` 테이블**:
+- 각 에셋(6-view, model shot, 3D model)의 독립적인 상태 추적
+- `retry_count` 필드로 재시도 횟수 제한 (최대 3회)
+- `error_message` 필드로 실패 원인 저장
+
+### 트레이드오프
+- **복잡도 증가**: 단일 API 호출 대비 여러 단계 필요
+- **개발 시간**: 상태 관리 로직 추가 개발 필요
+- **사용자 경험 향상**: 더 많은 제어권과 투명성 제공
+
+### 대안
+- **단일 API 호출**: 모든 에셋을 한 번에 생성 (재시도 불가, 사용자 제어 제한)
+- **백그라운드 자동 생성**: 사용자 개입 없이 자동 진행 (실패 시 대응 어려움)
+

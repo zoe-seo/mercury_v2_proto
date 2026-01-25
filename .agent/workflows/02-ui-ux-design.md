@@ -25,7 +25,7 @@ description: Deriving user needs for screen design or UI/UX design
    - 생성된 이미지를 보여주고, 실제 구현 시 참고할 '톤앤매너'로 최종 승인을 받습니다.
 
 5. **Drafting UI Spec**:
-   - 최종 승인된 내용을 `docs/design/ui-spec-[feature].md`에 기록합니다.
+   - 최종 승인된 내용을 `docs/design-fe/ui-spec-[feature].md`에 기록합니다.
    - 구성 요소:
      - **Layout Ref**: 사용된 레이아웃 템플릿 정보
      - **Component Tree**: 화면을 구성하는 컴포넌트 계층 구조

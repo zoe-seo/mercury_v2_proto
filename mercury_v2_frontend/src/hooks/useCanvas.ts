@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 
-export type ToolType = 'select' | 'brush' | 'shape' | 'text' | 'eraser';
+export type ToolType = 'select' | 'hand' | 'brush' | 'eraser' | 'shape' | 'text' | 'image';
 
 interface CanvasState {
   scale: number;

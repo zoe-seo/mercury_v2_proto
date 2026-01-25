@@ -9,7 +9,10 @@ celery_app = Celery(
     "mercury_v2",
     broker=settings.REDIS_URL,
     backend=settings.REDIS_URL,
-    include=["app.tasks.image_tasks"]
+    include=[
+        "app.tasks.image_tasks",
+        "app.tasks.design_package_tasks"
+    ]
 )
 
 # Celery configuration

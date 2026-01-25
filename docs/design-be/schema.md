@@ -74,7 +74,7 @@ erDiagram
         uuid session_id FK
         string role "user|assistant|system"
         text content
-        jsonb metadata
+        jsonb message_metadata
         timestamp created_at
         integer sequence_number
     }
@@ -124,7 +124,8 @@ erDiagram
         uuid canvas_project_id FK "nullable"
         string title
         text description
-        jsonb metadata
+        string status "draft|partial|2d_completed|3d_completed|completed"
+        jsonb package_metadata
         jsonb color_palette
         timestamp created_at
         timestamp updated_at
@@ -139,6 +140,20 @@ erDiagram
         string thumbnail_url
         integer display_order
         timestamp created_at
+    }
+    
+    production_assets {
+        uuid id PK
+        uuid design_package_id FK
+        string asset_type "6view_front|6view_back|6view_left|6view_right|6view_top|6view_bottom|model_shot|3d_model"
+        string asset_url "nullable"
+        string thumbnail_url "nullable"
+        string status "pending|processing|completed|failed"
+        jsonb generation_params
+        integer retry_count "default 0"
+        text error_message "nullable"
+        timestamp created_at
+        timestamp updated_at
     }
     
     market_reports {
@@ -236,7 +251,7 @@ MVP 단계에서는 단일 사용자 환경을 가정하지만, 확장성을 고
 | session_id | UUID | FK → chat_sessions(id), NOT NULL | 세션 ID |
 | role | VARCHAR(20) | NOT NULL | 메시지 역할 (user/assistant/system) |
 | content | TEXT | NOT NULL | 메시지 내용 |
-| metadata | JSONB | NULL | 추가 메타데이터 (이미지 참조 등) |
+| message_metadata | JSONB | NULL | 추가 메타데이터 (이미지 참조 등) |
 | created_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 생성 일시 |
 | sequence_number | INTEGER | NOT NULL | 메시지 순서 |
 
@@ -303,6 +318,8 @@ AI가 생성한 모든 이미지를 기록합니다.
 | layer_data | JSONB | NOT NULL | 레이어 데이터 (좌표, 스타일, 이미지 참조 등) |
 | z_index | INTEGER | NOT NULL | 레이어 순서 |
 | is_visible | BOOLEAN | NOT NULL, DEFAULT TRUE | 표시 여부 |
+| is_locked | BOOLEAN | NOT NULL, DEFAULT FALSE | 잠금 여부 |
+| opacity | FLOAT | NOT NULL, DEFAULT 1.0 | 투명도 (0.0 ~ 1.0) |
 | created_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 생성 일시 |
 | updated_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 수정 일시 |
 
@@ -325,7 +342,7 @@ AI가 생성한 모든 이미지를 기록합니다.
 | canvas_project_id | UUID | FK → canvas_projects(id), NULL | 캔버스 프로젝트 출처 |
 | title | VARCHAR(200) | NOT NULL | 디자인 제목 |
 | description | TEXT | NULL | 디자인 설명 |
-| metadata | JSONB | NULL | 메타데이터 (프롬프트, 키워드 등) |
+| package_metadata | JSONB | NULL | 메타데이터 (프롬프트, 키워드 등) |
 | color_palette | JSONB | NULL | 색상 팔레트 (HEX 코드 배열) |
 | created_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 생성 일시 |
 | updated_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 수정 일시 |

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Bell, User, Settings, LogOut, Sun } from 'lucide-react';
+import { Menu, X, Bell, User, Settings, Sun } from 'lucide-react';
 import { Button } from '../common/Button';
 import { cn } from '../../utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';

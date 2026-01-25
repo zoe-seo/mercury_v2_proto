@@ -113,7 +113,7 @@ const WavyText = ({ text, className, delay = 0 }: { text: string, className?: st
 
 // redesigned premium card
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CTACard = ({ title, subtitle, description, href, image, accentColor, icon: Icon }: any) => {
+const CTACard = ({ title, subtitle, description, href, image, icon: Icon }: any) => {
   return (
     <Link to={href} className="block group relative overflow-hidden rounded-3xl h-[360px] md:h-[420px] shadow-xl hover:shadow-2xl transition-all duration-500 w-full">
       {/* Background Image */}

@@ -1,56 +1,92 @@
 import { motion } from 'framer-motion';
-import { Layers, Eye, EyeOff, Lock, Unlock, Trash2, Plus } from 'lucide-react';
+import { Layers, Eye, EyeOff, Lock, Unlock, Trash2, Plus, GripVertical, Image as ImageIcon, PenTool, Type, Box } from 'lucide-react';
 import { Button } from '../common/Button';
-import { mockLayers } from '@/mocks/data/canvas';
+import { mockCanvasProject } from '../../mocks/data/canvas';
 import { cn } from '../../utils/cn';
+import { useState } from 'react';
 
 export const LayerPanel = () => {
+  const [layers, setLayers] = useState(mockCanvasProject.layers || []);
+  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(layers[0]?.id || null);
+
+  const toggleVisibility = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLayers(prev => prev.map(l => l.id === id ? { ...l, is_visible: !l.is_visible } : l));
+  };
+
+  const toggleLock = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLayers(prev => prev.map(l => l.id === id ? { ...l, is_locked: !l.is_locked } : l));
+  };
+
+  const getLayerIcon = (type: string) => {
+    switch(type) {
+      case 'image': return <ImageIcon size={14} />;
+      case 'text': return <Type size={14} />;
+      case 'sketch': return <PenTool size={14} />;
+      case 'generated': return <Box size={14} />;
+      default: return <Box size={14} />;
+    }
+  };
+
   return (
     <motion.div
       initial={{ x: 50, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="absolute top-6 right-6 w-[260px] bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 flex flex-col z-40 overflow-hidden"
+      className="absolute top-24 right-6 w-64 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-100 flex flex-col z-40 overflow-hidden pointer-events-auto"
     >
       {/* Header */}
-      <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-         <h3 className="font-heading font-semibold text-gray-800 flex items-center gap-2">
-           <Layers size={18} /> Layers
+      <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-white">
+         <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+           <Layers size={16} /> Layers
          </h3>
          <Button variant="ghost" size="icon" className="h-6 w-6">
-           <Plus size={16} />
+           <Plus size={14} />
          </Button>
       </div>
 
       {/* Layer List */}
-      <div className="flex-1 max-h-[400px] overflow-y-auto p-2 space-y-1">
-        {mockLayers.map((layer) => (
+      <div className="flex-1 max-h-[300px] overflow-y-auto p-2 space-y-1">
+        {[...layers].reverse().map((layer) => (
           <div 
             key={layer.id}
+            onClick={() => setSelectedLayerId(layer.id)}
             className={cn(
-              "flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors group",
-              "hover:bg-gray-100",
-              layer.id === 'l1' ? "bg-primary-50 border border-primary-100" : "bg-transparent border border-transparent"
+              "flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-colors group text-sm select-none",
+              layer.id === selectedLayerId ? "bg-primary-50 border border-primary-200" : "bg-transparent border border-transparent hover:bg-gray-50"
             )}
           >
-            {/* Thumbnail */}
-            <div className="w-8 h-8 bg-gray-200 rounded overflow-hidden flex-shrink-0 flex items-center justify-center">
-              {layer.type === 'image' && layer.thumbnailUrl && <img src={layer.thumbnailUrl} className="w-full h-full object-cover" />}
-              {layer.type === 'shape' && <div className="w-4 h-4 rounded-full" style={{ backgroundColor: layer.color }} />}
-              {layer.type === 'text' && <span className="text-xs font-bold text-gray-500">T</span>}
+            {/* Drag Handle */}
+            <div className="text-gray-300 cursor-grab opacity-0 group-hover:opacity-100">
+               <GripVertical size={12} />
+            </div>
+
+            {/* Icon / Thumbnail */}
+            <div className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center text-gray-500">
+               {getLayerIcon(layer.layer_type)}
             </div>
 
             {/* Name */}
-            <span className="flex-1 text-sm text-gray-700 truncate select-none">
-              {layer.name}
+            <span className={cn(
+                "flex-1 truncate",
+                layer.id === selectedLayerId ? "text-primary-700 font-medium" : "text-gray-600"
+            )}>
+              {layer.name || `Layer ${layer.z_index}`}
             </span>
 
-            {/* Actions (Hover) */}
-            <div className="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-              <button className="text-gray-400 hover:text-gray-600 p-0.5">
-                {layer.locked ? <Lock size={12} /> : <Unlock size={12} />}
+            {/* Actions */}
+            <div className="flex items-center gap-1">
+              <button 
+                onClick={(e) => toggleLock(layer.id, e)}
+                className={cn("p-1 rounded hover:bg-gray-200 transition-colors", layer.is_locked ? "text-amber-500" : "text-gray-300 opacity-0 group-hover:opacity-100")}
+              >
+                {layer.is_locked ? <Lock size={12} /> : <Unlock size={12} />}
               </button>
-              <button className="text-gray-400 hover:text-gray-600 p-0.5">
-                {layer.visible ? <Eye size={14} /> : <EyeOff size={14} />}
+              <button 
+                onClick={(e) => toggleVisibility(layer.id, e)}
+                className={cn("p-1 rounded hover:bg-gray-200 transition-colors", !layer.is_visible ? "text-gray-400" : "text-gray-400 opacity-0 group-hover:opacity-100")}
+              >
+                {layer.is_visible ? <Eye size={12} /> : <EyeOff size={12} />}
               </button>
             </div>
           </div>
@@ -58,10 +94,18 @@ export const LayerPanel = () => {
       </div>
 
       {/* Footer */}
-      <div className="p-3 border-t border-gray-100 bg-gray-50 flex justify-end">
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600">
-           <Trash2 size={16} />
-        </Button>
+      <div className="p-2 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
+         <div className="text-[10px] text-gray-400 px-2">
+             Drag to reorder
+         </div>
+         <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-7 w-7 text-gray-500 hover:text-red-500 hover:bg-red-50"
+            disabled={!selectedLayerId}
+        >
+            <Trash2 size={14} />
+         </Button>
       </div>
     </motion.div>
   );

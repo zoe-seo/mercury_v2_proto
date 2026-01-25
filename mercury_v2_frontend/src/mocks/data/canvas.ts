@@ -1,54 +1,48 @@
-export interface CanvasLayer {
-  id: string;
-  type: 'image' | 'shape' | 'text';
-  name: string;
-  visible: boolean;
-  locked: boolean;
-  // Position & properties for rendering
-  x: number;
-  y: number;
-  width?: number;
-  height?: number;
-  content?: string; // Image URL or Text content
-  color?: string;
-  thumbnailUrl?: string; // For layer panel
-}
+import type { CanvasProject } from '../../types/api/canvas';
 
-export const mockLayers: CanvasLayer[] = [
-  {
-    id: 'l1',
-    type: 'image',
-    name: 'Reference Shoe',
-    visible: true,
-    locked: false,
-    x: 100,
-    y: 100,
-    width: 400,
-    height: 300,
-    content: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=50'
+export const mockCanvasProject: CanvasProject = {
+  id: 'canvas-uuid-1',
+  name: 'Sketch Design 1',
+  project_id: 'proj-uuid-1',
+  canvas_state: {
+    viewport: { x: 0, y: 0, zoom: 1.0 },
   },
-  {
-    id: 'l2',
-    type: 'shape',
-    name: 'Accent Circle',
-    visible: true,
-    locked: false,
-    x: 400,
-    y: 150,
-    width: 100,
-    height: 100,
-    color: '#FF6B4A', // Coral
-  },
-  {
-    id: 'l3',
-    type: 'text',
-    name: 'Label: "Air Flow"',
-    visible: true,
-    locked: true,
-    x: 120,
-    y: 80,
-    content: 'Air Flow Concept',
-    color: '#333',
-  }
+  created_at: '2026-01-20T10:00:00Z',
+  updated_at: '2026-01-20T15:00:00Z',
+  layers: [
+    {
+      id: 'layer-1',
+      layer_type: 'sketch',
+      name: 'Sketch Base',
+      layer_data: {},
+      z_index: 0,
+      is_visible: true,
+      is_locked: false,
+    },
+    {
+      id: 'layer-2',
+      layer_type: 'image',
+      name: 'Reference Image',
+      layer_data: {},
+      z_index: 1,
+      is_visible: true,
+      is_locked: true,
+    },
+    {
+      id: 'layer-3',
+      layer_type: 'generated',
+      name: 'AI Generated Texture',
+      layer_data: {},
+      z_index: 2,
+      is_visible: true,
+      is_locked: false,
+    },
+  ],
+};
+
+export const mockSegments = [
+  { id: 'seg-1', label: 'Outsole', color: '#FF0000' },
+  { id: 'seg-2', label: 'Midsole', color: '#00FF00' },
+  { id: 'seg-3', label: 'Upper', color: '#0000FF' },
+  { id: 'seg-4', label: 'Laces', color: '#FFFF00' },
 ];

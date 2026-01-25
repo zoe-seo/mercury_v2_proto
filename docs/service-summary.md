@@ -275,8 +275,10 @@ finalize_report (최종 리포트 조합)
 
 ### Single Source of Truth
 - **기획 사항**: `docs/requirements/` (이 문서 포함)
-- **API 명세**: `docs/design/api-spec.md`
-- **DB 스키마**: `docs/design/schema.md`
+- **API 명세**: `docs/design-be/`
+- **UI/UX 디자인**: `docs/design-fe/`
+- **전역 설계 및 디자인 시스템**: `docs/design/`
+- **DB 스키마**: `docs/design-be/schema.md`
 - **아키텍처 결정**: `docs/design/architecture-decisions.md`
 
 ### 문서 업데이트 정책
@@ -299,8 +301,6 @@ finalize_report (최종 리포트 조합)
 - [REQ-004: Gallery & Export](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/requirements/req-004-gallery-export.md)
 - [REQ-005: User Profile](file:///c:/Users/bytesize/Desktop/mercury_v2/docs/requirements/req-005-user-profile.md)
 - [Architecture Decisions](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/design/architecture-decisions.md)
-- [API Specification](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/design/api-spec.md)
-- [Database Schema](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/design/schema.md)
 - [Project Rules](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/PROJECT_RULES.md)
 
 ---

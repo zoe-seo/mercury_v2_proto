@@ -18,14 +18,15 @@ from app.models.user import User
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.get("/me", response_model=UserProfileResponse)
+@router.get("/me", response_model=SuccessResponse[UserProfileResponse])
 async def get_current_user_profile(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Get current user's full profile with stats."""
     profile_data = await user_service.get_user_profile(db, current_user.id)
-    return UserProfileResponse(**profile_data)
+    user_profile = UserProfileResponse(**profile_data)
+    return SuccessResponse(data=user_profile, message="Success")
 
 
 @router.put("/me", response_model=SuccessResponse[dict])
@@ -70,7 +71,7 @@ async def update_notifications(
     )
 
 
-@router.post("/me/avatar", response_model=AvatarUploadResponse)
+@router.post("/me/avatar", response_model=SuccessResponse[AvatarUploadResponse])
 async def upload_avatar(
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
@@ -112,4 +113,5 @@ async def upload_avatar(
         file.filename or "avatar.png"
     )
     
-    return AvatarUploadResponse(avatar_url=avatar_url)
+    avatar_response = AvatarUploadResponse(avatar_url=avatar_url)
+    return SuccessResponse(data=avatar_response, message="Success")

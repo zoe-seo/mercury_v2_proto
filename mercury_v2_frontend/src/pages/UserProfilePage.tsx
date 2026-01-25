@@ -11,7 +11,7 @@ import { TabSecurity } from '../components/profile/tabs/TabSecurity';
 import { TabNotifications } from '../components/profile/tabs/TabNotifications';
 import { Save } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import type { UserProfile } from '@/types/api/user';
+
 
 export function UserProfilePage() {
   const { data: user, isLoading, isError } = useProfile();
@@ -43,13 +43,7 @@ export function UserProfilePage() {
     });
   };
 
-  const handlePreferenceChange = (field: string, value: any) => {
-     setFormData((prev: any) => {
-      setIsDirty(true);
-      return { ...prev, [field]: value }; // Flattened in local state or keep structure? Keeping flat for simplicity in this refactor step, but need to map back on save.
-      // Wait, let's keep it clean.
-    });
-  };
+
 
   // Helper to update specific nested parts of state
   const updateState = (updater: (prev: any) => any) => {
@@ -64,21 +58,20 @@ export function UserProfilePage() {
     if (!isDirty || !user) return;
 
     try {
-      const updates: Partial<UserProfile> = {
+      const updates: any = {
         nickname: formData.nickname,
         job_title: formData.job_title,
         bio: formData.bio,
         preferences: {
-            shoe_size_system: formData.shoe_size_system,
-            gender_category: formData.gender_category,
-            style_tags: formData.style_tags,
-            theme: user.preferences.theme 
+          shoe_size_system: formData.shoe_size_system,
+          gender_category: formData.gender_category,
+          style_tags: formData.style_tags,
         },
         notification_settings: formData.notifications
       };
+      
       await updateMutation.mutateAsync(updates);
       setIsDirty(false);
-      // alert('Saved!'); // In real app, toast
     } catch (error) {
       console.error('Failed to save', error);
     }

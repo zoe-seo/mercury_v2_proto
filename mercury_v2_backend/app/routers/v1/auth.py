@@ -19,7 +19,7 @@ from app.models.user import User
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 
-@router.post("/signup", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/signup", response_model=SuccessResponse[AuthResponse], status_code=status.HTTP_201_CREATED)
 async def signup(data: UserCreate, db: AsyncSession = Depends(get_db)):
     """Register a new user account."""
     try:
@@ -28,11 +28,12 @@ async def signup(data: UserCreate, db: AsyncSession = Depends(get_db)):
         # Create access token
         access_token = create_access_token(data={"sub": str(user.id)})
         
-        return AuthResponse(
+        auth_response = AuthResponse(
             user=UserResponse.model_validate(user),
             access_token=access_token,
             token_type="Bearer"
         )
+        return SuccessResponse(data=auth_response, message="Success")
     except ValidationException as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -40,7 +41,7 @@ async def signup(data: UserCreate, db: AsyncSession = Depends(get_db)):
         )
 
 
-@router.post("/login", response_model=AuthResponse)
+@router.post("/login", response_model=SuccessResponse[AuthResponse])
 async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
     """Authenticate user and return JWT token."""
     try:
@@ -49,11 +50,12 @@ async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
         # Create access token
         access_token = create_access_token(data={"sub": str(user.id)})
         
-        return AuthResponse(
+        auth_response = AuthResponse(
             user=UserResponse.model_validate(user),
             access_token=access_token,
             token_type="Bearer"
         )
+        return SuccessResponse(data=auth_response, message="Success")
     except UnauthorizedException as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -70,10 +72,11 @@ async def logout(current_user: User = Depends(get_current_user)):
     return None
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me", response_model=SuccessResponse[UserResponse])
 async def get_current_user_profile(current_user: User = Depends(get_current_user)):
     """Get current user profile."""
-    return UserResponse.model_validate(current_user)
+    user_response = UserResponse.model_validate(current_user)
+    return SuccessResponse(data=user_response, message="Success")
 
 
 @router.put("/password", response_model=SuccessResponse[dict])

@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { useCanvas } from '../../hooks/useCanvas';
-import { mockLayers } from '@/mocks/data/canvas';
+import { mockCanvasProject } from '../../mocks/data/canvas';
 
 interface CanvasBoardProps {
   logic: ReturnType<typeof useCanvas>;
@@ -10,31 +10,21 @@ export const CanvasBoard = ({ logic }: CanvasBoardProps) => {
   const { canvasState, handleWheel, handleMouseDown, handleMouseMove, handleMouseUp, isDragging } = logic;
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Attach non-passive wheel listener to block browser zoom
   useEffect(() => {
     const element = containerRef.current;
     if (!element) return;
-
-    // React's onWheel is passive by default, so we must add a native listener with passive: false
-    // to prevent the default browser zoom (Ctrl+Wheel).
     element.addEventListener('wheel', handleWheel, { passive: false });
-
     return () => {
       element.removeEventListener('wheel', handleWheel);
     };
   }, [handleWheel]);
 
-  // Grid Background Style
-  // We use CSS background-position to simulate moving grid without moving the actual div, 
-  // or we can move the whole div. Moving grid pattern is often smoother for "infinite" feel.
-  // Here we translate the background pattern based on offset.
   const gridStyle = {
     backgroundSize: `${20 * canvasState.scale}px ${20 * canvasState.scale}px`,
     backgroundPosition: `${canvasState.offset.x}px ${canvasState.offset.y}px`,
     backgroundImage: `radial-gradient(circle, #ddd 1px, transparent 1px)`,
   };
   
-  // Transform for Content Layer
   const contentStyle = {
     transform: `translate(${canvasState.offset.x}px, ${canvasState.offset.y}px) scale(${canvasState.scale})`,
     transformOrigin: '0 0',
@@ -43,66 +33,74 @@ export const CanvasBoard = ({ logic }: CanvasBoardProps) => {
   return (
     <div 
       ref={containerRef}
-      className={`absolute inset-0 z-0 overflow-hidden cursor-grab ${isDragging ? 'cursor-grabbing' : ''}`}
+      className={`absolute inset-0 z-0 overflow-hidden cursor-grab ${isDragging ? 'cursor-grabbing' : ''} bg-gray-50`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       style={gridStyle}
     >
-      {/* Content Layer */}
       <div 
-        className="absolute top-0 left-0 w-full h-full pointer-events-none" // Content doesn't block scroll events, children need pointer-events-auto
+        className="absolute top-0 left-0 w-full h-full pointer-events-none" 
         style={contentStyle}
       >
-        {mockLayers.map((layer) => {
-          if (!layer.visible) return null;
+        {mockCanvasProject.layers?.map((layer) => {
+          if (!layer.is_visible) return null;
+          // Mock positioning based on layer_data or random defaults for visual/mock purpose
+          const x = layer.layer_data.x || 100 + layer.z_index * 20;
+          const y = layer.layer_data.y || 100 + layer.z_index * 20;
+          const w = layer.layer_data.width || 200;
+          const h = layer.layer_data.height || 150;
+          const color = layer.layer_data.fill || '#e2e8f0';
+
           return (
             <div
               key={layer.id}
-              className="absolute pointer-events-auto" // Enable interaction on objects
+              className="absolute pointer-events-auto border border-transparent hover:border-primary-400 transition-colors"
               style={{
-                left: layer.x,
-                top: layer.y,
-                width: layer.width,
-                height: layer.height,
+                left: x,
+                top: y,
+                width: w,
+                height: h,
+                opacity: layer.opacity ?? 1,
+                zIndex: layer.z_index,
               }}
             >
-              {/* Type Rendering */}
-              {layer.type === 'image' && layer.content && (
-                <img 
-                   src={layer.content} 
-                   alt={layer.name} 
-                   className="w-full h-full object-cover shadow-lg select-none pointer-events-none" // prevent native drag
-                />
+              {layer.layer_type === 'image' && (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
+                    Image Placeholder
+                </div>
               )}
               
-              {layer.type === 'shape' && (
+              {layer.layer_type === 'shape' && (
                 <div 
-                  className="w-full h-full rounded-lg shadow-md"
-                  style={{ backgroundColor: layer.color }}
+                  className="w-full h-full shadow-sm"
+                  style={{ backgroundColor: color }}
                 />
               )}
 
-              {layer.type === 'text' && (
-                <div 
-                  className="w-full h-full font-heading font-bold text-4xl whitespace-nowrap"
-                  style={{ color: layer.color }}
-                >
-                  {layer.content}
+              {layer.layer_type === 'sketch' && (
+                  <svg className="w-full h-full overflow-visible pointer-events-none">
+                      <path d="M 10 10 Q 50 100 100 50 T 190 100" stroke="black" strokeWidth="2" fill="none" />
+                  </svg>
+              )}
+
+              {layer.layer_type === 'generated' && (
+                <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-100 border border-indigo-200 flex items-center justify-center text-indigo-400 text-xs">
+                    Generative Area
                 </div>
               )}
 
-              {/* Selection Ring (Mock) */}
-              <div className="absolute inset-0 border-2 border-transparent hover:border-primary-400 transition-colors" />
+              {/* Resize Handles Mock */}
+              <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-white border border-primary-500" />
             </div>
           );
         })}
       </div>
       
-      {/* Debug Info Overlay (Hidden in prod) */}
-      <div className="absolute bottom-4 right-4 bg-black/50 text-white text-xs p-2 rounded pointer-events-none">
-        Scale: {canvasState.scale.toFixed(2)} | X: {canvasState.offset.x.toFixed(0)} | Y: {canvasState.offset.y.toFixed(0)}
+      {/* HUD */}
+      <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur px-2 py-1 rounded text-[10px] text-gray-500 pointer-events-none border border-gray-100 shadow-sm">
+        {Math.round(canvasState.scale * 100)}% | {Math.round(canvasState.offset.x)}, {Math.round(canvasState.offset.y)}
       </div>
     </div>
   );
