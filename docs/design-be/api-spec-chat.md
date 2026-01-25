@@ -88,7 +88,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ## 5. 채팅 세션 (Chat Sessions)
 
-### 5.1 채팅 세션 목록 조회 `[DONE]`
+### 5.1 채팅 세션 목록 조회 `[DONE][FE-DONE]`
 
 **GET** `/chat/sessions`
 

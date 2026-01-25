@@ -18,19 +18,21 @@ async def get_canvas_projects(
     db: AsyncSession,
     user_id: uuid.UUID,
     skip: int = 0,
-    limit: int = 20
+    limit: int = 20,
+    project_id: Optional[uuid.UUID] = None
 ) -> list[CanvasProject]:
     """Get list of canvas projects for a user."""
-    result = await db.execute(
-        select(CanvasProject)
-        .where(
-            CanvasProject.user_id == user_id,
-            CanvasProject.is_deleted == False
-        )
-        .order_by(CanvasProject.created_at.desc())
-        .offset(skip)
-        .limit(limit)
+    query = select(CanvasProject).where(
+        CanvasProject.user_id == user_id,
+        CanvasProject.is_deleted == False
     )
+    
+    if project_id:
+        query = query.where(CanvasProject.project_id == project_id)
+        
+    query = query.order_by(CanvasProject.created_at.desc()).offset(skip).limit(limit)
+    
+    result = await db.execute(query)
     return list(result.scalars().all())
 
 

@@ -15,7 +15,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { Button } from '../common/Button';
-import type { ToolType } from '../../hooks/useCanvas';
+import type { ToolType } from '../../hooks/useFabricCanvas';
 
 interface TopToolbarProps {
   activeTool: ToolType;

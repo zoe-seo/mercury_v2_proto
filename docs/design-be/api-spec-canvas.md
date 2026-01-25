@@ -88,9 +88,13 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ### 6.1 캔버스 프로젝트 목록 조회 `[DONE]`
 
-**GET** `/canvas/projects`
+**GET** `/canvas/instances`
 
 **Headers**: `Authorization: Bearer {token}`
+
+**Query Parameters**:
+- `project_id`: 프로젝트 ID로 필터링 (Optional)
+- `page`, `page_size`: 페이지네이션
 
 **Response** (200):
 ```json
@@ -115,7 +119,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ### 6.2 캔버스 프로젝트 생성 `[DONE]`
 
-**POST** `/canvas/projects`
+**POST** `/canvas/instances`
 
 **Headers**: `Authorization: Bearer {token}`
 
@@ -146,7 +150,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ### 6.3 캔버스 프로젝트 상세 조회 `[DONE]`
 
-**GET** `/canvas/projects/{canvas_id}`
+**GET** `/canvas/instances/{canvas_id}`
 
 **Headers**: `Authorization: Bearer {token}`
 
@@ -192,7 +196,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ### 6.4 캔버스 상태 업데이트 `[DONE]`
 
-**PUT** `/canvas/projects/{canvas_id}`
+**PUT** `/canvas/instances/{canvas_id}`
 
 **Headers**: `Authorization: Bearer {token}`
 
@@ -222,7 +226,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ### 6.5 레이어 추가 `[DONE]`
 
-**POST** `/canvas/projects/{canvas_id}/layers`
+**POST** `/canvas/instances/{canvas_id}/layers`
 
 **Headers**: `Authorization: Bearer {token}`
 
@@ -257,7 +261,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ### 6.6 레이어 수정 `[DONE]`
 
-**PUT** `/canvas/projects/{canvas_id}/layers/{layer_id}`
+**PUT** `/canvas/instances/{canvas_id}/layers/{layer_id}`
 
 **Headers**: `Authorization: Bearer {token}`
 
@@ -287,7 +291,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ### 6.7 레이어 삭제 `[DONE]`
 
-**DELETE** `/canvas/projects/{canvas_id}/layers/{layer_id}`
+**DELETE** `/canvas/instances/{canvas_id}/layers/{layer_id}`
 
 **Headers**: `Authorization: Bearer {token}`
 
@@ -297,7 +301,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ### 6.8 Smart Segmentation 요청 `[READY]`
 
-**POST** `/canvas/projects/{canvas_id}/segment`
+**POST** `/canvas/instances/{canvas_id}/segment`
 
 **Headers**: `Authorization: Bearer {token}`
 
@@ -345,7 +349,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ### 6.9 Sketch-to-Image 생성 `[DONE]`
 
-**POST** `/canvas/projects/{canvas_id}/generate`
+**POST** `/canvas/instances/{canvas_id}/generate`
 
 **Headers**: `Authorization: Bearer {token}`
 
@@ -383,7 +387,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ### 6.10 Inpainting (부분 수정) `[DONE]`
 
-**POST** `/canvas/projects/{canvas_id}/inpaint`
+**POST** `/canvas/instances/{canvas_id}/inpaint`
 
 **Headers**: `Authorization: Bearer {token}`
 

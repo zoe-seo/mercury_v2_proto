@@ -9,6 +9,43 @@
 
 ## 2. Detailed Workflow
 
+### 2.0 Canvas Creation & Management
+
+#### 2.0.1 새 캔버스 생성 흐름
+1. **진입점**: Home 페이지에서 "Sketch to Design" 버튼 클릭
+2. **캔버스 생성 모달 표시**:
+   - **New Canvas 탭** (기본):
+     - Canvas Name 입력 (기본값: "Untitled Canvas")
+     - Project 선택 (Optional, 드롭다운)
+       - "None (Standalone)" - 독립 캔버스
+       - 기존 프로젝트 목록
+     - "Create & Start" 버튼
+   - **Recent Canvases 탭**:
+     - 최근 작업한 캔버스 목록 (최대 5개)
+     - 각 항목 클릭 시 해당 캔버스로 이동
+     - "View All Canvases" 링크 → 캔버스 목록 페이지로 이동
+3. **캔버스 생성 API 호출**: `POST /canvas/projects`
+4. **리다이렉트**: `/canvas/{canvas_id}`로 이동
+5. **자동 저장**: 편집 시작 후 2초 Debounce로 자동 저장
+
+#### 2.0.2 캔버스 목록 페이지 (`/canvas`)
+- **레이아웃**: 그리드 형태로 캔버스 카드 표시
+- **카드 정보**:
+  - 썸네일 이미지
+  - 캔버스 이름
+  - 마지막 수정 시간
+  - 연결된 프로젝트 이름 (있는 경우)
+- **액션**:
+  - 클릭: 캔버스 열기
+  - 삭제 버튼 (확인 모달)
+  - 복제 버튼 (Optional)
+- **필터링/검색**: 이름, 프로젝트별 필터
+
+#### 2.0.3 캔버스 이름 변경
+- **위치**: TopToolbar에 캔버스 이름 표시
+- **인터랙션**: 클릭 시 인라인 편집 모드
+- **저장**: Enter 키 또는 포커스 아웃 시 자동 저장
+
 ### 2.1 Canvas UI & Editor (Figma-like Interface)
 - **Layout**:
     - **Main Canvas**: 중앙의 무한 캔버스 (Infinite Canvas) + Zoom In/Out.
@@ -60,8 +97,14 @@
 - **Output**: 생성된 모든 리소스와 마케팅 리포트가 결합된 **Design Package**가 최종 갤러리로 전송됨.
 
 ## 3. Acceptance Criteria
+- [ ] Home에서 "Sketch to Design" 클릭 시 캔버스 생성 모달이 표시되어야 한다.
+- [ ] 모달에서 캔버스 이름과 프로젝트를 선택하여 새 캔버스를 생성할 수 있어야 한다.
+- [ ] Recent Canvases 탭에서 최근 작업한 캔버스를 선택할 수 있어야 한다.
+- [ ] `/canvas` 페이지에서 모든 캔버스 목록을 조회할 수 있어야 한다.
+- [ ] 캔버스 이름을 클릭하여 인라인 편집할 수 있어야 한다.
 - [ ] 사용자가 웹 캔버스에 그림을 그릴 수 있어야 한다.
 - [ ] 사용자가 이미지를 업로드하고 위치/크기를 조절할 수 있어야 한다.
+- [ ] 편집 후 2초 뒤 자동으로 저장되어야 한다.
 - [ ] 스케치 + 프롬프트로 이미지가 생성되어야 한다.
 - [ ] 스마트 세그멘테이션을 통해 파트를 선택하고 부분 수정(Inpainting) 할 수 있어야 한다.
 - [ ] 특정 이미지 노드를 선택하여 'Packaging Workshop'으로 진입할 수 있어야 한다.

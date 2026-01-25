@@ -6,9 +6,10 @@ import { cn } from '../../utils/cn';
 interface ChatInputProps {
   onSendMessage: (message: string, attachments?: File[]) => void;
   disabled?: boolean;
+  placeholder?: string;
 }
 
-export const ChatInput = ({ onSendMessage, disabled }: ChatInputProps) => {
+export const ChatInput = ({ onSendMessage, disabled, placeholder = "Describe your footwear idea..." }: ChatInputProps) => {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -52,7 +53,7 @@ export const ChatInput = ({ onSendMessage, disabled }: ChatInputProps) => {
           value={message}
           onChange={handleInput}
           onKeyDown={handleKeyDown}
-          placeholder="Describe your footwear idea..."
+          placeholder={placeholder}
           rows={1}
           disabled={disabled}
           className="flex-1 max-h-[120px] py-3 text-base text-gray-700 placeholder-gray-400 bg-transparent border-none focus:ring-0 resize-none overflow-y-auto"

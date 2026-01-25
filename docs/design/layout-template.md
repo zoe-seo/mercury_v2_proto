@@ -85,39 +85,40 @@ Mercury는 **Header + Top Navigation + Conditional Side Navigation + Main Conten
 - **접힌 상태**: 아이콘만 표시 (너비 64px)
 - **반응형**: 768px 이하에서는 오버레이 방식
 
-### 3.3 탭별 메뉴 구조
+### 3.3 탭별 메뉴 구조 (Context-aware Injection)
 
-#### Project 탭
+Side Navigation은 **범용 컴포넌트(Generic Component)**로 설계되어, 상위 탭(Context)에 따라 다른 메뉴 리스트를 주입받아 렌더링합니다.
+
+#### Project 탭 (Context: Project)
 ```
-📁 Project
-  💬 Text to Design
-  🎨 Sketch to Design
-  🖼️ Gallery
+[Header: PROJECT]
+  ⭐ Recent Designs  (기본 선택)
+  🎨 My Canvases
+  💬 My Chats
+  📂 My Projects
   📊 Analytics (추후)
 ```
 
-#### Development 탭 (추후 확장)
+#### Development 탭 (Context: Development - 추후 구현)
 ```
-👟 Development
+[Header: DEVELOPMENT]
   📋 Manufacturing Docs
   🔧 Parts & Materials
   📐 Specifications
   📊 Production Timeline
 ```
 
-> **참고**: Development는 신발 모델 개발에 관한 내용입니다 (제조 문서, 파트별 자료 등). 추후 확장 예정.
-
-#### Marketing 탭 (추후 확장)
+#### Marketing 탭 (Context: Marketing - 추후 구현)
 ```
-📈 Marketing
+[Header: MARKETING]
   📊 Analytics
   📢 Campaigns
   📄 Reports
 ```
 
-#### Support 탭 (추후 확장)
+#### Support 탭 (Context: Support - 추후 구현)
 ```
-💡 Support
+[Header: SUPPORT]
   📚 Help Center
   📧 Contact
   ❓ FAQ

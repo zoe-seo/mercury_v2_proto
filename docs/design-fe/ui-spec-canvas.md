@@ -24,8 +24,11 @@
 - **Precision Editing**: Inpainting(마스킹)을 통한 정교한 부분 수정
 
 ### 1.2 URL
-- `/canvas/new` (새 프로젝트)
-- `/canvas/:projectId` (기존 프로젝트)
+- `/canvas` (캔버스 목록 페이지)
+- `/canvas/:canvasId` (캔버스 편집 페이지)
+
+> [!IMPORTANT]
+> `/canvas/new` 라우트는 **제거**되었습니다. 새 캔버스 생성은 Home 페이지의 "Sketch to Design" 버튼을 통해 모달에서 이루어집니다.
 
 ### 1.3 레이아웃 모드
 - **Full-screen Mode**: 몰입감을 위해 Side Navigation을 숨기고 캔버스 영역을 최대화합니다.
@@ -64,9 +67,10 @@ CanvasPage
     │       └── SelectionOverlay (Handles, Bounds, Segments Highlight)
     │
     ├── TopToolbar (Z-50, Floating, Top Center)
+    │   ├── CanvasName (Editable)
     │   ├── ToolsGroup (Select, Hand, Brush, Eraser, Shape, Text, Image)
     │   ├── Divider
-    │   └── ActionsGroup (Undo, Redo, Zoom)
+    │   └── ActionsGroup (Undo, Redo, Zoom, Save Status)
     │
     ├── PropertiesPanel (Z-40, Floating, Top Left)
     │   └── ContextualControls (Color, Stroke, Font, etc.)
@@ -81,6 +85,31 @@ CanvasPage
         ├── PromptInput
         ├── GenerateButton
         └── InpaintControls
+
+CanvasListPage
+├── Header (Global)
+└── MainContent
+    ├── PageHeader
+    │   ├── Title ("My Canvases")
+    │   └── CreateButton
+    ├── FilterBar
+    │   ├── SearchInput
+    │   └── ProjectFilter
+    └── CanvasGrid
+        └── CanvasCard[] (Thumbnail, Name, Date, Actions)
+
+CreateCanvasModal
+├── ModalHeader ("Create New Canvas")
+├── TabBar
+│   ├── NewCanvasTab
+│   └── RecentCanvasesTab
+├── NewCanvasForm
+│   ├── CanvasNameInput
+│   ├── ProjectSelect
+│   └── CreateButton
+└── RecentCanvasList
+    ├── CanvasItem[] (Name, Date)
+    └── ViewAllLink
 ```
 
 ---
@@ -314,3 +343,4 @@ AI가 분석한 이미지의 파트 정보를 표시하고 선택을 돕는 패�
 ---
 
 본 UI 스펙은 **Fabric.js** 라이브러리의 표준 기능을 기준으로 작성되었습니다.
+

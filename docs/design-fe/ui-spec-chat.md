@@ -23,13 +23,36 @@
 - 생성된 디자인의 히스토리 관리 및 캔버스로의 연동
 
 ### 1.2 URL
-- `/chat/new` (새 세션)
-- `/chat/:sessionId` (기존 세션)
+- `/chats` (Empty State - 새 대화 시작)
+- `/chats/:sessionId` (기존 세션)
 
-### 1.3 레이아웃 참조
+### 1.3 사용자 흐름 (Lazy Session Creation)
+
+#### 새 대화 시작
+```
+1. Home → "Text to Design" 클릭
+2. /chats 페이지 로드
+   - 왼쪽: SessionListPanel (기존 세션 목록)
+   - 오른쪽: Empty State (환영 메시지 + 추천 프롬프트)
+3. 사용자가 첫 메시지 입력 + Send
+4. 세션 자동 생성 (title: 첫 메시지 요약)
+5. /chats/{session_id}로 리다이렉트
+6. AI 응답 시작
+```
+
+#### 기존 세션 재개
+```
+1. SessionListPanel에서 세션 클릭
+2. /chats/{session_id}로 이동
+3. 기존 대화 히스토리 로드
+4. 대화 계속
+```
+
+### 1.4 레이아웃 참조
 - **Header**: Top Navigation (Project > Text to Design 활성화)
 - **Side Nav**: 없음 (제거됨)
 - **Main Content**: 2-Column Layout (Session List + Chat Area)
+
 
 ---
 

@@ -86,7 +86,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ## 4. 프로젝트 (Projects)
 
-### 4.1 프로젝트 목록 조회 `[DONE]`
+### 4.1 프로젝트 목록 조회 `[DONE][FE-DONE]`
 
 **GET** `/projects`
 
@@ -122,7 +122,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 4.2 프로젝트 생성 `[DONE]`
+### 4.2 프로젝트 생성 `[DONE][FE-DONE]`
 
 **POST** `/projects`
 
@@ -151,7 +151,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 4.3 프로젝트 상세 조회 `[DONE]`
+### 4.3 프로젝트 상세 조회 `[DONE][FE-DONE]`
 
 **GET** `/projects/{project_id}`
 
@@ -180,7 +180,7 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 4.4 프로젝트 수정 `[DONE]`
+### 4.4 프로젝트 수정 `[DONE][FE-DONE]`
 
 **PUT** `/projects/{project_id}`
 
@@ -208,12 +208,59 @@ Mercury V2 백엔드 API 명세서입니다. RESTful API 원칙을 따르며, �
 
 ---
 
-### 4.5 프로젝트 삭제 `[DONE]`
+### 4.5 프로젝트 삭제 `[DONE][FE-DONE]`
 
 **DELETE** `/projects/{project_id}`
 
 **Headers**: `Authorization: Bearer {token}`
 
 **Response** (204): No Content
+
+---
+
+### 4.6 최근 작업 내역 조회 `[DONE][FE-DONE]`
+
+**GET** `/projects/recent-designs`
+
+**Headers**: `Authorization: Bearer {token}`
+
+**Query Parameters**:
+- `limit`: 조회할 개수 (기본값: 10, 최대: 50)
+
+**Response** (200):
+```json
+{
+  "data": {
+    "items": [
+      {
+        "id": "canvas-uuid-1",
+        "type": "canvas",
+        "title": "Sketch Design 1",
+        "description": null,
+        "thumbnail_url": "https://storage.example.com/canvas-thumbnails/canvas-1.jpg",
+        "updated_at": "2026-01-20T15:00:00Z",
+        "project_id": "proj-uuid-1",
+        "project_name": "2026 Spring Collection"
+      },
+      {
+        "id": "session-uuid-1",
+        "type": "chat",
+        "title": "Urban Sneaker Design",
+        "description": "미니멀한 도시형 러닝화",
+        "thumbnail_url": "https://storage.example.com/thumbnails/pkg-1.jpg",
+        "updated_at": "2026-01-20T14:30:00Z",
+        "project_id": null,
+        "project_name": null
+      }
+    ]
+  }
+}
+```
+
+#### Processing Logic
+1.  **Fetch**: 사용자의 최신 `canvas_projects`와 `chat_sessions`를 조회합니다.
+2.  **Union**: 두 리스트를 합치고 `updated_at` 기준으로 내림차순 정렬합니다.
+3.  **Limit**: 요청된 `limit` 개수만큼 자릅니다.
+4.  **Formatting**: `type` 필드를 추가하고 공통 포맷으로 변환하여 반환합니다.
 
 ---

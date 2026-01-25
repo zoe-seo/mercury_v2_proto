@@ -1,4 +1,4 @@
-from sqlalchemy import String, Text, Boolean
+from sqlalchemy import String, Text, Boolean, Index, text
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from datetime import datetime
@@ -9,6 +9,9 @@ from app.core.database import Base
 class ChatSession(Base):
     """Chat session model for text-based design generation."""
     __tablename__ = "chat_sessions"
+    __table_args__ = (
+        Index('idx_chat_sessions_user_updated', 'user_id', text("updated_at DESC")),
+    )
     
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 

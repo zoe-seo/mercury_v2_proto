@@ -50,15 +50,20 @@ async def get_sessions(
     )
 
 
-@router.post("/sessions", response_model=ChatSessionResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/sessions", status_code=status.HTTP_201_CREATED)
 async def create_session(
     data: ChatSessionCreate,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Create a new chat session."""
+    from app.schemas.responses import SuccessResponse
     session = await chat_service.create_session(db, current_user.id, data)
-    return ChatSessionResponse.model_validate(session)
+    return SuccessResponse(
+        data=ChatSessionResponse.model_validate(session),
+        message="Session created successfully"
+    )
+
 
 
 @router.get("/sessions/{session_id}", response_model=ChatSessionResponse)

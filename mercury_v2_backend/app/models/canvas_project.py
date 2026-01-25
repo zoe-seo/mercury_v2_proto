@@ -1,4 +1,4 @@
-from sqlalchemy import String, Text, Boolean, Float
+from sqlalchemy import String, Text, Boolean, Float, Index, text
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from datetime import datetime
@@ -9,6 +9,9 @@ from app.core.database import Base
 class CanvasProject(Base):
     """Canvas project model for sketch-based design work."""
     __tablename__ = "canvas_projects"
+    __table_args__ = (
+        Index('idx_canvas_projects_user_updated', 'user_id', text("updated_at DESC")),
+    )
     
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), 

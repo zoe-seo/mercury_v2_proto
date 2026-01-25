@@ -27,8 +27,9 @@ from app.core.exceptions import NotFoundException, ForbiddenException
 router = APIRouter(prefix="/canvas", tags=["canvas"])
 
 
-@router.get("/projects", response_model=SuccessResponse[dict])
+@router.get("/instances", response_model=SuccessResponse[dict])
 async def list_canvas_projects(
+    project_id: uuid.UUID | None = None,
     page: int = 1,
     page_size: int = 20,
     current_user: User = Depends(get_current_user),
@@ -37,7 +38,7 @@ async def list_canvas_projects(
     """Get list of canvas projects."""
     skip = (page - 1) * page_size
     projects = await canvas_service.get_canvas_projects(
-        db, current_user.id, skip, page_size
+        db, current_user.id, skip, page_size, project_id
     )
     
     return SuccessResponse(
@@ -54,7 +55,7 @@ async def list_canvas_projects(
     )
 
 
-@router.post("/projects", response_model=SuccessResponse[CanvasProjectResponse], status_code=status.HTTP_201_CREATED)
+@router.post("/instances", response_model=SuccessResponse[CanvasProjectResponse], status_code=status.HTTP_201_CREATED)
 async def create_canvas_project(
     data: CanvasProjectCreate,
     current_user: User = Depends(get_current_user),
@@ -68,7 +69,7 @@ async def create_canvas_project(
     )
 
 
-@router.get("/projects/{canvas_id}", response_model=SuccessResponse[CanvasProjectDetailResponse])
+@router.get("/instances/{canvas_id}", response_model=SuccessResponse[CanvasProjectDetailResponse])
 async def get_canvas_project(
     canvas_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
@@ -97,7 +98,7 @@ async def get_canvas_project(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
 
-@router.put("/projects/{canvas_id}", response_model=SuccessResponse[CanvasProjectResponse])
+@router.put("/instances/{canvas_id}", response_model=SuccessResponse[CanvasProjectResponse])
 async def update_canvas_project(
     canvas_id: uuid.UUID,
     data: CanvasProjectUpdate,
@@ -119,7 +120,7 @@ async def update_canvas_project(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
 
-@router.post("/projects/{canvas_id}/layers", response_model=SuccessResponse[CanvasLayerResponse], status_code=status.HTTP_201_CREATED)
+@router.post("/instances/{canvas_id}/layers", response_model=SuccessResponse[CanvasLayerResponse], status_code=status.HTTP_201_CREATED)
 async def create_canvas_layer(
     canvas_id: uuid.UUID,
     data: CanvasLayerCreate,
@@ -141,7 +142,7 @@ async def create_canvas_layer(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
 
-@router.put("/projects/{canvas_id}/layers/{layer_id}", response_model=SuccessResponse[CanvasLayerResponse])
+@router.put("/instances/{canvas_id}/layers/{layer_id}", response_model=SuccessResponse[CanvasLayerResponse])
 async def update_canvas_layer(
     canvas_id: uuid.UUID,
     layer_id: uuid.UUID,
@@ -164,7 +165,7 @@ async def update_canvas_layer(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
 
-@router.post("/projects/{canvas_id}/segment", response_model=SuccessResponse[SegmentationResponse])
+@router.post("/instances/{canvas_id}/segment", response_model=SuccessResponse[SegmentationResponse])
 async def segment_image(
     canvas_id: uuid.UUID,
     data: SegmentationRequest,
@@ -202,7 +203,7 @@ async def segment_image(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
 
-@router.delete("/projects/{canvas_id}/layers/{layer_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/instances/{canvas_id}/layers/{layer_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_canvas_layer(
     canvas_id: uuid.UUID,
     layer_id: uuid.UUID,
@@ -221,7 +222,7 @@ async def delete_canvas_layer(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
 
-@router.post("/projects/{canvas_id}/generate", response_model=SuccessResponse[TaskResponse], status_code=status.HTTP_201_CREATED)
+@router.post("/instances/{canvas_id}/generate", response_model=SuccessResponse[TaskResponse], status_code=status.HTTP_201_CREATED)
 async def generate_sketch_to_image(
     canvas_id: uuid.UUID,
     data: SketchToImageRequest,
@@ -246,7 +247,7 @@ async def generate_sketch_to_image(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
 
-@router.post("/projects/{canvas_id}/inpaint", response_model=SuccessResponse[TaskResponse], status_code=status.HTTP_201_CREATED)
+@router.post("/instances/{canvas_id}/inpaint", response_model=SuccessResponse[TaskResponse], status_code=status.HTTP_201_CREATED)
 async def inpaint_image(
     canvas_id: uuid.UUID,
     data: InpaintingRequest,

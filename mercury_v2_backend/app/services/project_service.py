@@ -4,9 +4,88 @@ import uuid
 import math
 
 from app.models.project import Project
-from app.schemas.project import ProjectCreate, ProjectUpdate
+from app.models.canvas_project import CanvasProject
+from app.models.chat_session import ChatSession
+from app.schemas.project import ProjectCreate, ProjectUpdate, RecentDesignItem
 from app.schemas.pagination import PaginationMeta
 from app.core.exceptions import NotFoundException
+
+
+async def get_recent_designs(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    limit: int = 10
+) -> list[RecentDesignItem]:
+    """Get recent designs (canvas and chat sessions) for a user."""
+    # Fetch recent canvas projects
+    canvas_query = (
+        select(CanvasProject)
+        .where(
+            CanvasProject.user_id == user_id,
+            CanvasProject.is_deleted == False
+        )
+        .order_by(CanvasProject.updated_at.desc())
+        .limit(limit)
+    )
+    canvas_result = await db.execute(canvas_query)
+    canvas_items = list(canvas_result.scalars().all())
+
+    # Fetch recent chat sessions
+    chat_query = (
+        select(ChatSession)
+        .where(
+            ChatSession.user_id == user_id,
+            ChatSession.is_archived == False
+        )
+        .order_by(ChatSession.updated_at.desc())
+        .limit(limit)
+    )
+    chat_result = await db.execute(chat_query)
+    chat_items = list(chat_result.scalars().all())
+
+    # Combine and sort
+    all_items = sorted(
+        canvas_items + chat_items,
+        key=lambda x: x.updated_at,
+        reverse=True
+    )[:limit]
+
+    # Collect project IDs
+    project_ids = {item.project_id for item in all_items if item.project_id}
+    
+    # Fetch project names
+    project_map = {}
+    if project_ids:
+        project_query = select(Project.id, Project.name).where(Project.id.in_(project_ids))
+        project_result = await db.execute(project_query)
+        project_map = {p.id: p.name for p in project_result.all()}
+
+    # Convert to schema
+    recent_designs = []
+    for item in all_items:
+        is_canvas = isinstance(item, CanvasProject)
+        item_type = "canvas" if is_canvas else "chat"
+        
+        # Determine description and thumbnail
+        description = None
+        if not is_canvas:
+            # item is ChatSession
+            pass
+            
+        recent_designs.append(
+            RecentDesignItem(
+                id=item.id,
+                type=item_type,
+                title=item.name if is_canvas else item.title,
+                description=description,
+                thumbnail_url=None,
+                updated_at=item.updated_at,
+                project_id=item.project_id,
+                project_name=project_map.get(item.project_id)
+            )
+        )
+
+    return recent_designs
 
 
 async def get_projects(

@@ -20,13 +20,13 @@ export interface RegisterRequest {
 
 export const authApi = {
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
-    return response.data;
+    const response = await apiClient.post<{ data: AuthResponse }>('/auth/login', credentials);
+    return response.data.data;
   },
 
   signup: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/auth/signup', data);
-    return response.data;
+    const response = await apiClient.post<{ data: AuthResponse }>('/auth/signup', data);
+    return response.data.data;
   },
 
   logout: async (): Promise<void> => {
@@ -34,7 +34,7 @@ export const authApi = {
   },
   
   getMe: async (): Promise<User> => {
-    const response = await apiClient.get<User>('/auth/me');
-    return response.data;
+    const response = await apiClient.get<{ data: User }>('/auth/me');
+    return response.data.data;
   }
 };

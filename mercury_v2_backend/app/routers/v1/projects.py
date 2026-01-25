@@ -7,7 +7,8 @@ from app.schemas.project import (
     ProjectCreate,
     ProjectUpdate,
     ProjectResponse,
-    ProjectListResponse
+    ProjectListResponse,
+    RecentDesignItem
 )
 from app.schemas.responses import SuccessResponse
 from app.core.auth import get_current_user
@@ -44,6 +45,22 @@ async def create_project(
     """Create a new project."""
     project = await project_service.create_project(db, current_user.id, data)
     return ProjectResponse.model_validate(project)
+
+
+@router.get("/recent-designs", response_model=SuccessResponse[dict])
+async def get_recent_designs(
+    limit: int = Query(10, ge=1, le=50),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get recent design history."""
+    items = await project_service.get_recent_designs(
+        db, current_user.id, limit
+    )
+    return SuccessResponse(
+        data={"items": items},
+        message="Success"
+    )
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)

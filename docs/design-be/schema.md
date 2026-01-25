@@ -238,6 +238,7 @@ MVP 단계에서는 단일 사용자 환경을 가정하지만, 확장성을 고
 - `idx_chat_sessions_user_id` on `user_id`
 - `idx_chat_sessions_project_id` on `project_id`
 - `idx_chat_sessions_created_at` on `created_at DESC`
+- `idx_chat_sessions_user_updated` on `(user_id, updated_at DESC)`
 
 ---
 
@@ -303,6 +304,8 @@ AI가 생성한 모든 이미지를 기록합니다.
 **인덱스**:
 - `idx_canvas_projects_user_id` on `user_id`
 - `idx_canvas_projects_project_id` on `project_id`
+- `idx_canvas_projects_created_at` on `created_at DESC`
+- `idx_canvas_projects_user_updated` on `(user_id, updated_at DESC)`
 
 ---
 

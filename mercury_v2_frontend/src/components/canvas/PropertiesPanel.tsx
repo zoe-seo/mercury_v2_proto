@@ -1,14 +1,22 @@
 import { motion } from 'framer-motion';
 import { Sliders, Pipette, Hash } from 'lucide-react';
-import type { ToolType } from '../../hooks/useCanvas';
+import type { ToolType } from '../../hooks/useFabricCanvas';
+import { useCanvasStore } from '../../store/canvasStore';
+import { useFabricCanvas } from '../../hooks/useFabricCanvas';
+import { useState } from 'react';
 
 interface PropertiesPanelProps {
   activeTool: ToolType;
-  selectedObject?: any; // To be typed properly with Fabric object types later
-  onPropertyChange?: (property: string, value: any) => void;
+  selectedObject?: any;
+  canvasId: string | undefined;
 }
 
-export const PropertiesPanel = ({ activeTool, selectedObject }: PropertiesPanelProps) => {
+export const PropertiesPanel = ({ activeTool, selectedObject, canvasId }: PropertiesPanelProps) => {
+  const { brushSettings, setBrushSize, setBrushColor } = useCanvasStore();
+  const { fabricCanvasRef } = useFabricCanvas(canvasId);
+  const [localSize, setLocalSize] = useState(brushSettings.size);
+  const [localColor, setLocalColor] = useState(brushSettings.color);
+
   // If no specific properties to show, hide panel
   if (['hand', 'eraser', 'image'].includes(activeTool) && !selectedObject) {
     return null;
@@ -18,6 +26,29 @@ export const PropertiesPanel = ({ activeTool, selectedObject }: PropertiesPanelP
   if (activeTool === 'select' && !selectedObject) {
     return null;
   }
+
+  const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSize = parseInt(e.target.value);
+    setLocalSize(newSize);
+    setBrushSize(newSize);
+    
+    // Update Fabric brush immediately
+    const canvas = fabricCanvasRef.current;
+    if (canvas && canvas.freeDrawingBrush) {
+      canvas.freeDrawingBrush.width = newSize;
+    }
+  };
+
+  const handleColorChange = (color: string) => {
+    setLocalColor(color);
+    setBrushColor(color);
+    
+    // Update Fabric brush immediately
+    const canvas = fabricCanvasRef.current;
+    if (canvas && canvas.freeDrawingBrush && activeTool === 'brush') {
+      canvas.freeDrawingBrush.color = color;
+    }
+  };
 
   return (
     <motion.div
@@ -36,13 +67,14 @@ export const PropertiesPanel = ({ activeTool, selectedObject }: PropertiesPanelP
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-gray-500">
               <span>Size</span>
-              <span>12px</span>
+              <span>{localSize}px</span>
             </div>
             <input 
               type="range" 
               min="1" 
               max="100" 
-              defaultValue="12"
+              value={localSize}
+              onChange={handleSizeChange}
               className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-500"
             />
           </div>
@@ -52,10 +84,19 @@ export const PropertiesPanel = ({ activeTool, selectedObject }: PropertiesPanelP
               <span>Color</span>
             </div>
             <div className="flex items-center gap-2">
-               <div className="w-8 h-8 rounded-full bg-black border border-gray-200 cursor-pointer shadow-sm"></div>
+               <div 
+                 className="w-8 h-8 rounded-full border border-gray-200 cursor-pointer shadow-sm"
+                 style={{ backgroundColor: localColor }}
+               ></div>
                <div className="flex-1 h-8 rounded-md border border-gray-200 flex items-center px-2 gap-2 text-xs text-gray-600 bg-white">
                   <Hash size={12} />
-                  <span>000000</span>
+                  <input
+                    type="text"
+                    value={localColor.replace('#', '')}
+                    onChange={(e) => handleColorChange('#' + e.target.value)}
+                    className="flex-1 bg-transparent border-none outline-none"
+                    maxLength={6}
+                  />
                </div>
                <button className="p-1.5 rounded-md hover:bg-gray-100" title="Eyedropper">
                   <Pipette size={16} className="text-gray-600"/>
@@ -63,23 +104,14 @@ export const PropertiesPanel = ({ activeTool, selectedObject }: PropertiesPanelP
             </div>
              <div className="flex gap-1.5 flex-wrap">
                 {['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'].map(c => (
-                    <div key={c} className="w-5 h-5 rounded-full border border-gray-200 cursor-pointer" style={{ backgroundColor: c}} />
+                    <div 
+                      key={c} 
+                      className="w-5 h-5 rounded-full border border-gray-200 cursor-pointer hover:ring-2 hover:ring-primary-400" 
+                      style={{ backgroundColor: c}}
+                      onClick={() => handleColorChange(c)}
+                    />
                 ))}
              </div>
-          </div>
-
-          <div className="space-y-2">
-             <div className="flex justify-between text-xs text-gray-500">
-              <span>Opacity</span>
-              <span>100%</span>
-            </div>
-             <input 
-              type="range" 
-              min="0" 
-              max="100" 
-              defaultValue="100"
-              className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-500"
-            />
           </div>
         </div>
       )}
@@ -105,19 +137,6 @@ export const PropertiesPanel = ({ activeTool, selectedObject }: PropertiesPanelP
                     <input className="w-full px-2 py-1 text-sm border border-gray-200 rounded" value="150" readOnly />
                 </div>
             </div>
-            <div className="space-y-2">
-             <div className="flex justify-between text-xs text-gray-500">
-              <span>Opacity</span>
-              <span>100%</span>
-            </div>
-             <input 
-              type="range" 
-              min="0" 
-              max="100" 
-              defaultValue="100"
-              className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-500"
-            />
-          </div>
         </div>
       )}
       

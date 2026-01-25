@@ -35,3 +35,17 @@ class ProjectListResponse(BaseModel):
     """Schema for project list response with pagination."""
     items: list[ProjectResponse]
     pagination: PaginationMeta
+
+
+class RecentDesignItem(BaseModel):
+    """Schema for recent design item (Canvas or Chat)."""
+    id: uuid.UUID
+    type: str = Field(..., pattern="^(canvas|chat)$")
+    title: str
+    description: str | None = None
+    thumbnail_url: str | None = None
+    updated_at: datetime
+    project_id: uuid.UUID | None = None
+    project_name: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)

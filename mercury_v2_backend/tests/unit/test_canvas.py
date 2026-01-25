@@ -20,7 +20,7 @@ class TestCanvasProjects:
     async def test_create_canvas_project(self, client: AsyncClient, auth_headers):
         """Test creating a new canvas project."""
         response = await client.post(
-            "/api/v1/canvas/projects",
+            "/api/v1/canvas/instances",
             json={"name": "Test Canvas", "project_id": None},
             headers=auth_headers
         )
@@ -35,14 +35,14 @@ class TestCanvasProjects:
         """Test listing canvas projects."""
         # Create a project first
         await client.post(
-            "/api/v1/canvas/projects",
+            "/api/v1/canvas/instances",
             json={"name": "Test Canvas"},
             headers=auth_headers
         )
         
         # List projects
         response = await client.get(
-            "/api/v1/canvas/projects",
+            "/api/v1/canvas/instances",
             headers=auth_headers
         )
         assert response.status_code == 200
@@ -56,7 +56,7 @@ class TestCanvasProjects:
         """Test getting canvas project details."""
         # Create a project
         create_response = await client.post(
-            "/api/v1/canvas/projects",
+            "/api/v1/canvas/instances",
             json={"name": "Test Canvas"},
             headers=auth_headers
         )
@@ -64,7 +64,7 @@ class TestCanvasProjects:
         
         # Get project details
         response = await client.get(
-            f"/api/v1/canvas/projects/{canvas_id}",
+            f"/api/v1/canvas/instances/{canvas_id}",
             headers=auth_headers
         )
         assert response.status_code == 200
@@ -77,7 +77,7 @@ class TestCanvasProjects:
         """Test updating canvas state."""
         # Create a project
         create_response = await client.post(
-            "/api/v1/canvas/projects",
+            "/api/v1/canvas/instances",
             json={"name": "Test Canvas"},
             headers=auth_headers
         )
@@ -85,7 +85,7 @@ class TestCanvasProjects:
         
         # Update canvas state
         response = await client.put(
-            f"/api/v1/canvas/projects/{canvas_id}",
+            f"/api/v1/canvas/instances/{canvas_id}",
             json={"canvas_state": {"viewport": {"x": 100, "y": 50, "zoom": 1.5}}},
             headers=auth_headers
         )
@@ -102,7 +102,7 @@ class TestCanvasLayers:
         """Test adding a layer to canvas."""
         # Create a canvas project
         create_response = await client.post(
-            "/api/v1/canvas/projects",
+            "/api/v1/canvas/instances",
             json={"name": "Test Canvas"},
             headers=auth_headers
         )
@@ -110,7 +110,7 @@ class TestCanvasLayers:
         
         # Add a layer
         response = await client.post(
-            f"/api/v1/canvas/projects/{canvas_id}/layers",
+            f"/api/v1/canvas/instances/{canvas_id}/layers",
             json={
                 "layer_type": "sketch",
                 "layer_data": {"paths": []},
@@ -131,14 +131,14 @@ class TestCanvasLayers:
         """Test updating a layer."""
         # Create canvas and layer
         create_response = await client.post(
-            "/api/v1/canvas/projects",
+            "/api/v1/canvas/instances",
             json={"name": "Test Canvas"},
             headers=auth_headers
         )
         canvas_id = create_response.json()["data"]["id"]
         
         layer_response = await client.post(
-            f"/api/v1/canvas/projects/{canvas_id}/layers",
+            f"/api/v1/canvas/instances/{canvas_id}/layers",
             json={
                 "layer_type": "sketch",
                 "layer_data": {"paths": []},
@@ -150,7 +150,7 @@ class TestCanvasLayers:
         
         # Update layer
         response = await client.put(
-            f"/api/v1/canvas/projects/{canvas_id}/layers/{layer_id}",
+            f"/api/v1/canvas/instances/{canvas_id}/layers/{layer_id}",
             json={
                 "is_visible": False,
                 "is_locked": True,
@@ -169,14 +169,14 @@ class TestCanvasLayers:
         """Test deleting a layer."""
         # Create canvas and layer
         create_response = await client.post(
-            "/api/v1/canvas/projects",
+            "/api/v1/canvas/instances",
             json={"name": "Test Canvas"},
             headers=auth_headers
         )
         canvas_id = create_response.json()["data"]["id"]
         
         layer_response = await client.post(
-            f"/api/v1/canvas/projects/{canvas_id}/layers",
+            f"/api/v1/canvas/instances/{canvas_id}/layers",
             json={
                 "layer_type": "sketch",
                 "layer_data": {"paths": []},
@@ -188,7 +188,7 @@ class TestCanvasLayers:
         
         # Delete layer
         response = await client.delete(
-            f"/api/v1/canvas/projects/{canvas_id}/layers/{layer_id}",
+            f"/api/v1/canvas/instances/{canvas_id}/layers/{layer_id}",
             headers=auth_headers
         )
         assert response.status_code == 204
@@ -202,7 +202,7 @@ class TestCanvasAIFeatures:
         """Test smart segmentation request."""
         # Create canvas
         create_response = await client.post(
-            "/api/v1/canvas/projects",
+            "/api/v1/canvas/instances",
             json={"name": "Test Canvas"},
             headers=auth_headers
         )
@@ -210,7 +210,7 @@ class TestCanvasAIFeatures:
         
         # Request segmentation
         response = await client.post(
-            f"/api/v1/canvas/projects/{canvas_id}/segment",
+            f"/api/v1/canvas/instances/{canvas_id}/segment",
             json={"layer_id": "00000000-0000-0000-0000-000000000000"},
             headers=auth_headers
         )
@@ -223,7 +223,7 @@ class TestCanvasAIFeatures:
         """Test sketch-to-image generation."""
         # Create canvas
         create_response = await client.post(
-            "/api/v1/canvas/projects",
+            "/api/v1/canvas/instances",
             json={"name": "Test Canvas"},
             headers=auth_headers
         )
@@ -231,7 +231,7 @@ class TestCanvasAIFeatures:
         
         # Generate image
         response = await client.post(
-            f"/api/v1/canvas/projects/{canvas_id}/generate",
+            f"/api/v1/canvas/instances/{canvas_id}/generate",
             json={
                 "layer_ids": [],
                 "prompt": "Test prompt",
@@ -249,7 +249,7 @@ class TestCanvasAIFeatures:
         """Test inpainting request."""
         # Create canvas
         create_response = await client.post(
-            "/api/v1/canvas/projects",
+            "/api/v1/canvas/instances",
             json={"name": "Test Canvas"},
             headers=auth_headers
         )
@@ -257,7 +257,7 @@ class TestCanvasAIFeatures:
         
         # Request inpainting
         response = await client.post(
-            f"/api/v1/canvas/projects/{canvas_id}/inpaint",
+            f"/api/v1/canvas/instances/{canvas_id}/inpaint",
             json={
                 "layer_id": "00000000-0000-0000-0000-000000000000",
                 "mask_data": {"paths": []},
