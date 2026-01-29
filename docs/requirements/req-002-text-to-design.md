@@ -1,52 +1,55 @@
-# REQ-002: Text to Design (Chat Interface)
+# REQ-002: Text to Design (Guided Chat Interface)
 
 ## 1. User Story
-- **디자이너**로서,
-- **AI 챗봇과의 대화**를 통해 막연한 아이디어를 구체화하고,
-- **텍스트 및 레퍼런스**를 기반으로 초기 신발 디자인을 생성하며,
-- 최종적으로 마케팅/비용 분석이 포함된 **디자인 패키지**를 얻기를 원한다.
 
-## 2. Detailed Workflow
+### 1.1 Core Value
+- **디자이너/사용자**로서,
+- 막연한 아이디어를 **단계별 가이드(Guided Flow)**를 통해 구체화하고,
+- **AI의 도움**을 받아 실제 생산 가능한 수준의 신발 디자인을 생성하며,
+- 이 모든 디자인 과정을 **저장하고 언제든 다시 이어서(Resume)** 작업하고 싶다.
 
-### 2.1 Requirement Gathering (Interview Phase)
-- **Chat UI**: 사용자가 자연어로 대화할 수 있는 인터페이스 (Stream Response 적용 필수).
-- **Role**: AI는 전문 신발 디자이너/컨설턴트 페르소나를 가짐.
-- **Data Collection**: 
-    - **Brand Identity**: 사용자가 추구하는 브랜드 이미지 및 철학 수집.
-    - **Preferences**: Target Audience, 소재, 색상 팔레트, 가격대, 스타일 키워드 등.
-    - **Reference**: (Optional) 사용자가 레퍼런스 이미지 업로드 가능.
-- **Session Management**: 모든 채팅 세션은 자동 저장되며, 사용자가 삭제하지 않는 한 영구 보존 및 재개(Resume) 가능해야 함.
+---
 
-### 2.2 Outline Selection (Intermediate Phase) - [NEW]
-- 디자인 생성 전, 사용자의 의도를 명확히 하기 위한 **중간 단계**.
-- **Process**:
-    1. 수집된 요구사항 및 브랜드 아이덴티티를 기반으로 AI가 **Outline(스케치/윤곽선)** 이미지들을 먼저 제안.
-    2. 사용자는 이 중 가장 의도에 부합하는 Outline을 선택.
-    3. 선택된 Outline을 바탕으로 본격적인 렌더링 및 디벨롭 진행.
+## 2. Functional Requirements
 
-### 2.3 Image Generation & Refinement
-- **Generation**: 선택된 Outline과 텍스트 프롬프트를 결합하여 고퀄리티 디자인 생성 (Stream).
-- **History**: 생성된 모든 이미지는 히스토리로 기록.
-- **Canvas Integration**: 
-    - 생성된 이미지를 더 정교하게 수정하고 싶을 경우, **Sketch Canvas(REQ-003)**로 내보내기 가능.
-    - 이 경우 해당 작업은 하나의 **'Project'**로 묶여 관리됨.
+### 2.1 Session Management (세션 관리)
+- **New Chat**: 사용자는 언제든지 새로운 디자인 세션을 시작할 수 있어야 한다.
+- **Session List**: 과거에 진행했던 모든 디자인 대화 목록을 조회할 수 있어야 한다.
+- **Resume & History**: 
+  - 과거 세션을 클릭하면 이전 대화 내용과 생성된 디자인 상태가 그대로 복원되어야 한다.
+  - 중단된 단계(Step)에서부터 즉시 작업을 재개할 수 있어야 한다.
+- **Regeneration**: 완료된 세션에서도 디자인을 수정하거나 다시 생성(Re-roll)할 수 있어야 한다.
 
-### 2.4 Design Package Generation (Output)
-- 최종 선택된 디자인에 대해 **Design Package** 생성.
-- **Market/Cost Analysis**: MVP 단계에서는 외부 데이터 연동 없이 **LLM의 지식 베이스 및 추론 능력**을 활용하여 작성.
-- **Package Contents**:
-    - **Meta Info**: 생성 일시, 프롬프트, 키워드, 브랜드 정보.
-    - **Main Image**: 고해상도 메인 뷰.
-    - **Model Shot**: 착용 샷 또는 연출 샷 생성.
-    - **Marketing Report**: 시장 분석, 트렌드, 비용 추산 (LLM 추론).
-    - **Similar Products**: 유사 레퍼런스.
+### 2.2 Guided Design Workflow (단계별 디자인)
+- **Initial Intent**: 디자인의 첫 시작은 자연어 입력(텍스트)으로 의도를 전달받되, 초기 1번에 한정한다.
+- **Step-by-Step Selection**: 이후 디자인 과정은 다음의 정해진 단계를 따른다.
+  1. **Profile**: 타겟 성별, 사용 용도(카테고리) 설정
+  2. **Outline**: 신발의 전체적인 실루엣 선택
+  3. **Sole**: 아웃솔/미드솔 디자인 선택
+  4. **Colors & Materials**: 주요 색상 및 소재 선택
+  5. **Style**: 스타일 키워드(Mood) 선택
+  6. **Result**: 최종 이미지 생성 및 확인
 
-## 3. Acceptance Criteria
-- [ ] 챗봇이 주도적으로 질문하여 디자인 사양을 구체화해야 한다.
-- [ ] 대화 도중 이미지를 생성하고 보여줄 수 있어야 한다.
-- [ ] 과거 생성된 이미지들을 대화방 내에서 또는 별도 패널에서 볼 수 있어야 한다.
-- [ ] 최종 결과물로 '디자인 패키지'가 생성되어야 하며, 상기 명시된 리포트 내용이 포함되어야 한다.
+### 2.3 Interactive UX
+- **No Free Chat**: 사용자가 디자인 결정을 위한 자유 텍스트를 입력하는 것을 지양하고, 선택지(Option)를 통해 명확한 의사결정을 하도록 유도한다.
+- **Immediate Change (Undo/Redo)**: 언제든지 이전 단계의 선택을 변경할 수 있어야 하며, 변경 시 관련된 하위 단계는 적절히 초기화되어야 한다.
+- **Assistant Role**: AI는 대화를 주도하지 않고, 현재 단계에 대한 설명과 가이드를 제공하는 역할에 집중한다.
 
-## 4. Open Questions
-- 디자인 패키지의 '시장 분석'이나 '비용 분석' 데이터의 출처나 정확도는 어느 수준을 목표로 하는가? (실제 데이터 연동 vs LLM 기반 추론)
-- 채팅 세션(Session)의 저장 및 재개 기능이 필요한가?
+---
+
+## 3. Non-Functional Requirements
+
+- **Latency**: 각 단계별 선택에 대한 UI 반응은 즉각적이어야 한다 (이미지 생성 제외).
+- **Generation Time**: 최종 이미지 생성은 15초 이내에 완료되어야 한다 (목표).
+- **Consistency**: 세션을 종료하고 다시 접속해도 데이터의 유실이 없어야 한다 (Persistence).
+
+---
+
+## 4. Acceptance Criteria
+
+- [ ] "New Chat" 버튼을 통해 새로운 디자인 세션을 시작할 수 있다.
+- [ ] 사이드바 또는 목록에서 과거 세션을 클릭하여 대화를 복원할 수 있다.
+- [ ] 첫 텍스트 입력 후, AI가 적절한 추천 카테고리/타겟을 제안(또는 프리셋)해야 한다.
+- [ ] 아웃라인, 솔, 컬러 등의 선택 단계가 순차적으로 진행되어야 한다.
+- [ ] 이전 단계의 선택을 변경하면, 이후 단계의 선택이 초기화되거나 유효성 검사가 수행되어야 한다.
+- [ ] 최종적으로 선택한 스펙(Spec)대로 이미지가 생성되어야 한다.

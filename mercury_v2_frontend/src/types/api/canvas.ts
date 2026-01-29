@@ -9,6 +9,7 @@ export interface CanvasInstance {
       zoom: number;
     };
   };
+  thumbnail_url: string;
   created_at: string;
   updated_at: string;
   layers?: CanvasLayer[];

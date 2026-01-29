@@ -57,8 +57,8 @@ export function TabProfile({ formData, onChange, userEmail }: TabProfileProps) {
                         placeholder="Tell us a little bit about yourself..."
                     />
                     <div className="flex justify-end mt-1.5">
-                        <span className={cn("text-xs font-medium", formData.bio.length > 180 ? "text-orange-500" : "text-gray-400")}>
-                            {formData.bio.length}/200
+                        <span className={cn("text-xs font-medium", formData.bio?.length > 180 ? "text-orange-500" : "text-gray-400")}>
+                            {formData.bio?.length}/200
                         </span>
                     </div>
                 </InputGroup>

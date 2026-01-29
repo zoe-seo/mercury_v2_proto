@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/mercury_v2"
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5433/mercury_v2"
     
     # Security
     SECRET_KEY: str = "your-secret-key-change-this-in-production"

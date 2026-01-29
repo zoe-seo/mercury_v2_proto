@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercury - Projects Interface UI Specification</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --text-color: #1f2937;
+            --bg-color: #f3f4f6;
+            --content-bg: #ffffff;
+            --code-bg: #f9fafb;
+            --border-color: #e5e7eb;
+            --heading-color: #111827;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--content-bg);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        h1, h2, h3, h4 {
+            color: var(--heading-color);
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+        h1 {
+            font-size: 2.25rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5em;
+            margin-top: 0;
+        }
+        h2 {
+            font-size: 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.3em;
+        }
+        h3 {
+            font-size: 1.5rem;
+            color: #374151;
+        }
+        h4 {
+            font-size: 1.25rem;
+            color: #4b5563;
+        }
+        p {
+            margin-bottom: 1em;
+        }
+        ul, ol {
+            padding-left: 1.5em;
+            margin-bottom: 1em;
+        }
+        li {
+            margin-bottom: 0.5em;
+        }
+        code {
+            background-color: var(--code-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+            color: #db2777;
+            border: 1px solid var(--border-color);
+        }
+        pre {
+            background-color: #1f2937;
+            color: #f3f4f6;
+            padding: 1.5em;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border: none;
+            font-size: 0.9em;
+        }
+        blockquote {
+            border-left: 4px solid var(--primary-color);
+            margin: 1em 0;
+            padding: 0.5em 0 0.5em 1em;
+            background-color: #eff6ff;
+            color: #1e40af;
+            border-radius: 0 4px 4px 0;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid var(--border-color);
+            margin: 2em 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75em;
+            text-align: left;
+        }
+        th {
+            background-color: var(--code-bg);
+            font-weight: 600;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: block;
+            margin: 1em 0;
+        }
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 9999px;
+            color: #065f46;
+            background-color: #d1fae5;
+            margin-left: 0.5em;
+        }
+        .meta-info {
+            background-color: #f8fafc;
+            padding: 1em;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2em;
+        }
+        .meta-info ul {
+            margin: 0;
+            padding-left: 1.2em;
+            list-style-type: none;
+        }
+        .meta-info li {
+            margin-bottom: 0.25em;
+            color: #64748b;
+        }
+        .meta-info strong {
+            color: #334155;
+            min-width: 80px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mercury - Projects Interface UI Specification</h1>
+
+        <div class="meta-info">
+            <h2>문서 정보</h2>
+            <ul>
+                <li><strong>작성일:</strong> 2026-01-25</li>
+                <li><strong>작성자:</strong> UI/UX Designer</li>
+                <li><strong>상태:</strong> <span class="badge">Approved ✅</span></li>
+                <li><strong>버전:</strong> 1.0</li>
+                <li><strong>관련 문서:</strong>
+                    <ul>
+                        <li><a href="../requirements/req-006-projects.md">REQ-006: Projects Management</a></li>
+                        <li><a href="../design/layout-template.md">Layout Template</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <h2>0. Visual Reference</h2>
+        <p>
+            <img src="C:/Users/tjwn1/.gemini/antigravity/brain/3aa4cafd-e0e1-4b21-9dc4-5b0db73c8d6d/projects_page_mockup_1769314375803.png" alt="Projects Page Mockup">
+            <small><em>(Note: Image source path may need update based on local environment)</em></small>
+        </p>
+
+        <hr>
+
+        <h2>1. 페이지 개요</h2>
+
+        <h3>1.1 목적</h3>
+        <ul>
+            <li><strong>Unified Workspace</strong>: 사용자의 모든 작업물(Canvas, Chat)을 한 곳에서 모아보고 관리합니다.</li>
+            <li><strong>Efficient Organization</strong>: 프로젝트(폴더) 기능을 통해 디자인 컬렉션을 체계적으로 분류합니다.</li>
+            <li><strong>Quick Access</strong>: 최근 작업물에 빠르게 접근하고 새로운 작업을 즉시 시작할 수 있습니다.</li>
+        </ul>
+
+        <h3>1.2 URL 구조</h3>
+        <ul>
+            <li><code>/projects</code> (메인 프로젝트 페이지 - Recent Designs 기본)</li>
+            <li><code>/projects/canvases</code> (Canvas 모아보기)</li>
+            <li><code>/projects/chats</code> (Chat 모아보기)</li>
+            <li><code>/projects/folders</code> (프로젝트 폴더 목록)</li>
+            <li><code>/projects/folders/:projectId</code> (특정 프로젝트 상세)</li>
+        </ul>
+
+        <h3>1.3 레이아웃 구조</h3>
+        <ul>
+            <li><strong>Global Layout</strong>: Header + Side Navigation + Main Content</li>
+            <li><strong>Main Content</strong>:
+                <ul>
+                    <li><strong>Toolbar Area</strong>: 검색, 필터, 정렬, 생성 버튼 (Sticky)</li>
+                    <li><strong>Content Grid</strong>: 반응형 카드 그리드</li>
+                </ul>
+            </li>
+        </ul>
+
+        <hr>
+
+        <h2>2. 컴포넌트 트리</h2>
+<pre><code>ProjectsPage
+├── Header (Global)
+├── SideNavigation (Global Style, Project Tab Active)
+└── MainContent Area
+    ├── PageHeader (Title depending on View)
+    │
+    ├── ToolbarContainer
+    │   ├── SearchInput (Global Search within view)
+    │   ├── FilterGroup (All/Canvas/Chat - if applicable)
+    │   ├── SortDropdown (Recent/Name/Created)
+    │   └── CreateButton (Primary CTA)
+    │
+    ├── ContentGrid (Responsive Grid)
+    │   ├── DesignCard (Canvas/Chat Type)
+    │   │   ├── ThumbnailArea (Snapshot or Icon)
+    │   │   ├── Badge (Type Indicator)
+    │   │   ├── InfoArea (Title, Date, Project Tag)
+    │   │   └── ActionMenu (Meatball Menu)
+    │   │
+    │   └── ProjectFolderCard
+    │       ├── FolderIcon
+    │       ├── Title & Count
+    │       └── PreviewThumbnails (Stacked)
+    │
+    ├── EmptyStatePlaceholder
+    └── Pagination / InfiniteScrollTrigger
+</code></pre>
+
+        <hr>
+
+        <h2>3. 상세 인터페이스 설계</h2>
+
+        <h3>3.1 Side Navigation (Local Context)</h3>
+        <p><code>layout-template.md</code>에 정의된 Global Side Nav의 'Project' 탭 내부 구조입니다.</p>
+        <ul>
+            <li><strong>메뉴 항목</strong>:
+                <ol>
+                    <li><strong>⭐ Recent Designs</strong> (Default): 최근 수정된 순서로 모든 작업물 표시</li>
+                    <li><strong>🎨 My Canvases</strong>: 캔버스 작업물만 필터링</li>
+                    <li><strong>💬 My Chats</strong>: 채팅 세션만 필터링</li>
+                    <li><strong>📁 My Projects</strong>: 프로젝트 폴더 목록</li>
+                </ol>
+            </li>
+            <li><strong>스타일</strong>:
+                <ul>
+                    <li>활성 상태: 배경색 <code>Primary-50</code> + 텍스트 <code>Primary-700</code> + 좌측 보더 <code>Primary-500</code></li>
+                    <li>비활성 상태: 투명 배경 + 텍스트 <code>Gray-600</code></li>
+                    <li>호버 효과: 배경색 <code>Gray-100</code></li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>3.2 Main Content - Toolbar Area</h3>
+        <p>사용자가 콘텐츠를 쉽게 찾고 관리할 수 있는 도구 모음입니다.</p>
+        <ul>
+            <li><strong>위치</strong>: Main Content 최상단 (Header 아래)</li>
+            <li><strong>높이</strong>: 64px</li>
+            <li><strong>구성 요소</strong>:
+                <ul>
+                    <li><strong>Left</strong>:
+                        <ul>
+                            <li><strong>Search</strong>: "Search projects..." (Width: 320px)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Right</strong>:
+                        <ul>
+                            <li><strong>Filter</strong>: [All | Canvas | Chat] (Segmented Control style) <em>Recent Designs 뷰에서만 표시</em></li>
+                            <li><strong>Sort</strong>: [Last Modified ▼] (Dropdown)</li>
+                            <li><strong>New Button</strong>: [+ New Project] or [+ New Canvas/Chat] (Context dependent)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>3.3 Design Card (Common Component)</h3>
+        <p>Canvas와 Chat 작업물을 표현하는 표준 카드 UI입니다.</p>
+        <ul>
+            <li><strong>크기</strong>: Responsive Grid (Min-width: 280px, Max-width: 1fr)</li>
+            <li><strong>비율</strong>: 약 1:1.2 (세로형)</li>
+            <li><strong>Visual Style</strong>:
+                <ul>
+                    <li>Background: White</li>
+                    <li>Border: 1px solid <code>Gray-200</code></li>
+                    <li>Radius: <code>rounded-lg</code></li>
+                    <li>Shadow: <code>shadow-sm</code> (Hover: <code>shadow-md</code> + <code>translate-y-[-2px]</code>)</li>
+                </ul>
+            </li>
+            <li><strong>내부 구성</strong>:
+                <ol>
+                    <li><strong>Thumbnail (상단 60%)</strong>:
+                        <ul>
+                            <li><strong>Aspect Ratio</strong>: 16:9</li>
+                            <li><strong>Content</strong>:
+                                <ul>
+                                    <li>Canvas: 캔버스 스냅샷 이미지 (<code>object-cover</code>)</li>
+                                    <li>Chat: 대표 생성 이미지 또는 텍스트 버블 아이콘 패턴 (<code>bg-gray-50</code>)</li>
+                                </ul>
+                            </li>
+                            <li><strong>Overlay</strong>: 호버 시 "Open" 버튼 표시 (Semi-transparent black dim)</li>
+                            <li><strong>Type Badge</strong>: 좌측 상단 (Green for Canvas, Blue for Chat)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Info Area (하단 40%)</strong>:
+                        <ul>
+                            <li><strong>Title</strong>: 1줄 말줄임 (Bold, <code>Gray-900</code>)</li>
+                            <li><strong>Description</strong>: 2줄 말줄임 (Regular, <code>Gray-500</code>, Chat인 경우 첫 메시지)</li>
+                            <li><strong>Meta</strong>:
+                                <ul>
+                                    <li>날짜 ("2h ago", <code>text-xs</code>, <code>Gray-400</code>)</li>
+                                    <li>프로젝트 태그 (Pill shape, 클릭 시 해당 프로젝트로 이동)</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Action</strong>:
+                        <ul>
+                            <li>우측 하단 (또는 상단) Meatball Menu (...)</li>
+                            <li>메뉴: Rename, Share, Move to Project, Duplicate, Delete</li>
+                        </ul>
+                    </li>
+                </ol>
+            </li>
+        </ul>
+
+        <h3>3.4 Project Folder Card</h3>
+        <p>프로젝트(컬렉션)를 표현하는 폴더 형태의 카드입니다. 'My Projects' 뷰에서 사용됩니다.</p>
+        <ul>
+            <li><strong>스타일</strong>: macOS 폴더 아이콘 느낌을 현대적으로 재해석</li>
+            <li><strong>구성</strong>:
+                <ul>
+                    <li><strong>Icon</strong>: 큰 폴더 아이콘 (📁) 또는 포함된 디자인들의 썸네일 스택(Stacked Preview)</li>
+                    <li><strong>Info</strong>:
+                        <ul>
+                            <li><strong>Title</strong>: 프로젝트 이름</li>
+                            <li><strong>Count badge</strong>: "12 items"</li>
+                        </ul>
+                    </li>
+                    <li><strong>Interaction</strong>: 더블 클릭 시 프로젝트 상세(<code>projects/:id</code>) 진입</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>3.5 Project Detail View (<code>/projects/:id</code>)</h3>
+        <p>특정 프로젝트 폴더 내부에 들어왔을 때의 뷰입니다.</p>
+        <ul>
+            <li><strong>Header</strong>:
+                <ul>
+                    <li><strong>Breadcrumb</strong>: Projects &gt; [Project Name]</li>
+                    <li><strong>Title</strong>: 프로젝트 이름 (클릭하여 수정 가능)</li>
+                    <li><strong>Description</strong>: 프로젝트 설명 (Optional)</li>
+                </ul>
+            </li>
+            <li><strong>Content</strong>:
+                <ul>
+                    <li>해당 프로젝트에 속한 Design Card 그리드</li>
+                </ul>
+            </li>
+            <li><strong>Empty State</strong>:
+                <ul>
+                    <li>"이 프로젝트는 비어있습니다."</li>
+                    <li>[+ Add Design] (기존 디자인 가져오기), [+ Create New] (새로 만들기) 버튼</li>
+                </ul>
+            </li>
+        </ul>
+
+        <hr>
+
+        <h2>4. 모달 (Modals)</h2>
+
+        <h3>4.1 Create Project Modal</h3>
+        <ul>
+            <li><strong>Trigger</strong>: [+ New Project] 버튼 클릭</li>
+            <li><strong>Fields</strong>:
+                <ul>
+                    <li><strong>Name</strong>: 프로젝트 이름 (Required)</li>
+                    <li><strong>Description</strong>: 설명 (Optional)</li>
+                </ul>
+            </li>
+            <li><strong>Footer</strong>: [Cancel] [Create Project]</li>
+        </ul>
+
+        <h3>4.2 Move to Project Modal</h3>
+        <ul>
+            <li><strong>Trigger</strong>: Design Card &gt; Menu &gt; "Move to Project"</li>
+            <li><strong>Content</strong>:
+                <ul>
+                    <li>검색 가능한 프로젝트 리스트</li>
+                    <li>[+ Create New Project] 빠른 생성 옵션</li>
+                </ul>
+            </li>
+            <li><strong>Action</strong>: 선택 후 [Move]</li>
+        </ul>
+
+        <h3>4.3 Setup New Canvas/Chat Modal (기존 로직 활용)</h3>
+        <ul>
+            <li>Home 화면의 "Start" 버튼과 동일한 모달을 재사용합니다.</li>
+            <li>단, 현재 뷰가 특정 Project 내부라면, 생성 시 해당 <code>project_id</code>가 자동으로 주입되어야 합니다.</li>
+        </ul>
+
+        <hr>
+
+        <h2>5. 인터랙션 및 상태 (States)</h2>
+
+        <h3>5.1 Loading</h3>
+        <ul>
+            <li><strong>Skeleton UI</strong>: 카드 그리드 형태의 스켈레톤 애니메이션 표시</li>
+            <li>데이터 로드 중 깜빡임(Flicker) 최소화</li>
+        </ul>
+
+        <h3>5.2 Empty States</h3>
+        <ul>
+            <li>각 뷰(Recent, Canvases 등)에 데이터가 없을 때 표시</li>
+            <li><strong>Illustration</strong>: 은은한 라인 아트 일러스트</li>
+            <li><strong>Message</strong>: "아직 작업 내역이 없습니다."</li>
+            <li><strong>Call to Action</strong>: "첫 번째 디자인을 시작해보세요!" (버튼)</li>
+        </ul>
+
+        <h3>5.3 Error Handling</h3>
+        <ul>
+            <li>API 실패 시 Toast 알림 ("Failed to load projects")</li>
+            <li>‘Retry’ 버튼이 포함된 Error Placeholder 표시</li>
+        </ul>
+
+        <hr>
+
+        <h2>6. 반응형 대응 (Responsive)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Breakpoint</th>
+                    <th>Layout</th>
+                    <th>Columns</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Mobile</strong> (&lt; 768px)</td>
+                    <td>Side Nav Hidden (Drawer), 1 Col Grid</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td><strong>Tablet</strong> (768px+)</td>
+                    <td>Side Nav Icon Only, 2-3 Col Grid</td>
+                    <td>2 ~ 3</td>
+                </tr>
+                <tr>
+                    <td><strong>Desktop</strong> (1024px+)</td>
+                    <td>Full Layout, 3-4 Col Grid</td>
+                    <td>3 ~ 4</td>
+                </tr>
+                <tr>
+                    <td><strong>Wide</strong> (1440px+)</td>
+                    <td>Full Layout, 4-5 Col Grid</td>
+                    <td>4 ~ 5</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

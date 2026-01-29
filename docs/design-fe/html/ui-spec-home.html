@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercury - Home Page UI Specification</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --text-color: #1f2937;
+            --bg-color: #f3f4f6;
+            --content-bg: #ffffff;
+            --code-bg: #f9fafb;
+            --border-color: #e5e7eb;
+            --heading-color: #111827;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--content-bg);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        h1, h2, h3, h4 {
+            color: var(--heading-color);
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+        h1 {
+            font-size: 2.25rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5em;
+            margin-top: 0;
+        }
+        h2 {
+            font-size: 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.3em;
+        }
+        h3 {
+            font-size: 1.5rem;
+            color: #374151;
+        }
+        h4 {
+            font-size: 1.25rem;
+            color: #4b5563;
+        }
+        p {
+            margin-bottom: 1em;
+        }
+        ul, ol {
+            padding-left: 1.5em;
+            margin-bottom: 1em;
+        }
+        li {
+            margin-bottom: 0.5em;
+        }
+        code {
+            background-color: var(--code-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+            color: #db2777;
+            border: 1px solid var(--border-color);
+        }
+        pre {
+            background-color: #1f2937;
+            color: #f3f4f6;
+            padding: 1.5em;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border: none;
+            font-size: 0.9em;
+        }
+        blockquote {
+            border-left: 4px solid var(--primary-color);
+            margin: 1em 0;
+            padding: 0.5em 0 0.5em 1em;
+            background-color: #eff6ff;
+            color: #1e40af;
+            border-radius: 0 4px 4px 0;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid var(--border-color);
+            margin: 2em 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75em;
+            text-align: left;
+        }
+        th {
+            background-color: var(--code-bg);
+            font-weight: 600;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: block;
+            margin: 1em 0;
+        }
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 9999px;
+            color: #065f46;
+            background-color: #d1fae5;
+            margin-left: 0.5em;
+        }
+        .meta-info {
+            background-color: #f8fafc;
+            padding: 1em;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2em;
+        }
+        .meta-info ul {
+            margin: 0;
+            padding-left: 1.2em;
+            list-style-type: none;
+        }
+        .meta-info li {
+            margin-bottom: 0.25em;
+            color: #64748b;
+        }
+        .meta-info strong {
+            color: #334155;
+            min-width: 80px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mercury - Home Page UI Specification</h1>
+
+        <div class="meta-info">
+            <h2>문서 정보</h2>
+            <ul>
+                <li><strong>작성일:</strong> 2026-01-22</li>
+                <li><strong>작성자:</strong> UI/UX Designer</li>
+                <li><strong>상태:</strong> <span class="badge">Approved ✅</span></li>
+                <li><strong>버전:</strong> 1.0</li>
+                <li><strong>관련 문서:</strong>
+                    <ul>
+                        <li><a href="../design/layout-template.md">Layout Template</a></li>
+                        <li><a href="../design/design-system.md">Design System</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <h2>0. Visual Reference</h2>
+        <p>
+            <img src="C:/Users/tjwn1/.gemini/antigravity/brain/9c49e5eb-7f9e-4610-9263-9b26050e52ce/home_page_design_1769092128620.png" alt="Home Page Visual Prototype">
+            <small><em>(Note: Image source path may need update based on local environment)</em></small>
+        </p>
+
+        <hr>
+
+        <h2>1. 페이지 개요</h2>
+
+        <h3>1.1 목적</h3>
+        <ul>
+            <li>Mercury의 대문 역할</li>
+            <li>주요 기능(Text to Design, Sketch to Design)으로의 빠른 진입</li>
+            <li>최근 작업 및 갤러리 하이라이트 제공</li>
+            <li>사용자의 작업 현황 한눈에 파악</li>
+        </ul>
+
+        <h3>1.2 URL</h3>
+        <ul>
+            <li><code>/</code> 또는 <code>/home</code></li>
+        </ul>
+
+        <h3>1.3 레이아웃 참조</h3>
+        <ul>
+            <li><strong>Header</strong>: Top Navigation (Home 활성화)</li>
+            <li><strong>Side Nav</strong>: 없음</li>
+            <li><strong>Main Content</strong>: 중앙 정렬, 최대 너비 1400px</li>
+        </ul>
+
+        <hr>
+
+        <h2>2. 컴포넌트 트리</h2>
+<pre><code>HomePage
+├── Header
+│   ├── Logo
+│   ├── TopNavigation (Home 활성화)
+│   └── UserMenu
+├── MainContent
+│   ├── HeroSection
+│   │   ├── Heading
+│   │   ├── Subheading
+│   │   └── CTACards
+│   │       ├── TextToDesignCard
+│   │       └── SketchToDesignCard
+│   ├── RecentProjectsSection
+│   │   ├── SectionHeader
+│   │   ├── ProjectGrid (4개)
+│   │   └── ViewAllButton
+│   ├── GalleryHighlightsSection
+│   │   ├── SectionHeader
+│   │   ├── DesignGrid (6개, 2x3)
+│   │   └── ExploreGalleryButton
+│   └── QuickStatsSection (선택 사항)
+└── Footer (선택 사항)
+</code></pre>
+
+        <hr>
+
+        <h2>3. 섹션별 상세 설계</h2>
+
+        <h3>3.1 Hero Section</h3>
+
+        <h4>레이아웃</h4>
+        <ul>
+            <li><strong>위치</strong>: 페이지 최상단</li>
+            <li><strong>최대 너비</strong>: 1200px (중앙 정렬)</li>
+            <li><strong>패딩</strong>: 상단 80px, 하단 60px</li>
+            <li><strong>배경</strong>:
+                <ul>
+                    <li>옵션 1: 순수 흰색</li>
+                    <li>옵션 2: 매우 연한 그라데이션 (Primary-50 → White)</li>
+                    <li>옵션 3: 추상적인 신발 일러스트 배경 (매우 연하게)</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Heading</h4>
+        <ul>
+            <li><strong>텍스트</strong>: "Transform Your Ideas into Shoe Designs"</li>
+            <li><strong>폰트</strong>: font-heading, text-4xl (36px), font-bold</li>
+            <li><strong>색상</strong>: Gray-800</li>
+            <li><strong>정렬</strong>: 중앙</li>
+            <li><strong>애니메이션</strong>: Fade In + Slide Up (0.5s delay)</li>
+        </ul>
+
+        <h4>Subheading</h4>
+        <ul>
+            <li><strong>텍스트</strong>: "AI-powered design generation and management platform for footwear designers"</li>
+            <li><strong>폰트</strong>: font-sans, text-lg (18px), font-normal</li>
+            <li><strong>색상</strong>: Gray-600</li>
+            <li><strong>정렬</strong>: 중앙</li>
+            <li><strong>여백</strong>: 상단 16px (space-4)</li>
+            <li><strong>애니메이션</strong>: Fade In + Slide Up (0.6s delay)</li>
+        </ul>
+
+        <h4>CTA Cards</h4>
+        <p><strong>레이아웃</strong></p>
+        <ul>
+            <li><strong>배치</strong>: 2개 카드, 가로 배치 (Flexbox 또는 Grid)</li>
+            <li><strong>간격</strong>: 24px (space-6)</li>
+            <li><strong>여백</strong>: 상단 48px (space-12)</li>
+        </ul>
+
+        <p><strong>Text to Design Card</strong></p>
+<pre><code>구조:
+┌─────────────────────────┐
+│   💬 (아이콘, 48px)      │
+│                         │
+│   Text to Design        │ (제목)
+│   Chat with AI to       │ (설명)
+│   create designs        │
+│                         │
+│   [Start →]             │ (버튼)
+└─────────────────────────┘
+</code></pre>
+        <ul>
+            <li><strong>크기</strong>: 너비 280px, 높이 자동</li>
+            <li><strong>배경</strong>: White</li>
+            <li><strong>보더</strong>: 2px solid Primary-200</li>
+            <li><strong>보더 반경</strong>: rounded-2xl (20px)</li>
+            <li><strong>패딩</strong>: 32px (space-8)</li>
+            <li><strong>그림자</strong>: shadow</li>
+            <li><strong>호버 효과</strong>:
+                <ul>
+                    <li>배경: Primary-50</li>
+                    <li>보더: Primary-400</li>
+                    <li>그림자: shadow-primary</li>
+                    <li>변환: translateY(-6px)</li>
+                    <li>전환: 0.3s ease-out</li>
+                </ul>
+            </li>
+            <li><strong>아이콘</strong>:
+                <ul>
+                    <li>크기: 48px</li>
+                    <li>색상: Primary-500</li>
+                    <li>여백 하단: 16px</li>
+                </ul>
+            </li>
+            <li><strong>제목</strong>:
+                <ul>
+                    <li>폰트: font-heading, text-xl (20px), font-semibold</li>
+                    <li>색상: Gray-800</li>
+                    <li>여백 하단: 8px</li>
+                </ul>
+            </li>
+            <li><strong>설명</strong>:
+                <ul>
+                    <li>폰트: font-sans, text-sm (14px), font-normal</li>
+                    <li>색상: Gray-600</li>
+                    <li>여백 하단: 24px</li>
+                </ul>
+            </li>
+            <li><strong>버튼</strong>:
+                <ul>
+                    <li>Primary Button 스타일</li>
+                    <li>전체 너비</li>
+                    <li>텍스트: "Start" + 화살표 아이콘</li>
+                </ul>
+            </li>
+        </ul>
+
+        <p><strong>Sketch to Design Card</strong></p>
+        <ul>
+            <li>동일한 스타일</li>
+            <li>아이콘: 🎨 (Palette 아이콘)</li>
+            <li>제목: "Sketch to Design"</li>
+            <li>설명: "Draw on canvas and generate designs"</li>
+            <li>버튼: "Start" → <code>/canvas/new</code></li>
+        </ul>
+
+        <p><strong>애니메이션</strong></p>
+        <ul>
+            <li>Stagger Children (0.1s 간격)</li>
+            <li>각 카드: Fade In + Slide Up</li>
+        </ul>
+
+        <hr>
+
+        <h3>3.2 Recent Projects Section</h3>
+
+        <h4>레이아웃</h4>
+        <ul>
+            <li><strong>여백</strong>: 상단 80px (space-20)</li>
+            <li><strong>최대 너비</strong>: 1400px</li>
+        </ul>
+
+        <h4>Section Header</h4>
+        <ul>
+            <li><strong>제목</strong>: "Recent Projects"</li>
+            <li><strong>폰트</strong>: font-heading, text-2xl (24px), font-bold</li>
+            <li><strong>색상</strong>: Gray-800</li>
+            <li><strong>여백 하단</strong>: 24px (space-6)</li>
+            <li><strong>추가 요소</strong>:
+                <ul>
+                    <li>우측에 "View All →" 링크 (text-sm, Primary-600)</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Project Grid</h4>
+        <ul>
+            <li><strong>레이아웃</strong>: 4개 카드, Grid (4열)</li>
+            <li><strong>간격</strong>: 16px (space-4)</li>
+            <li><strong>반응형</strong>:
+                <ul>
+                    <li>Desktop (≥1280px): 4열</li>
+                    <li>Tablet (768-1279px): 2열</li>
+                    <li>Mobile (&lt;768px): 1열</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Project Card</h4>
+<pre><code>구조:
+┌─────────────────────┐
+│                     │
+│   [썸네일 이미지]     │ (16:9 비율)
+│                     │
+├─────────────────────┤
+│ Project Name        │
+│ 2 hours ago  [Chat] │ (시간 + 타입 배지)
+└─────────────────────┘
+</code></pre>
+        <ul>
+            <li><strong>썸네일</strong>:
+                <ul>
+                    <li>비율: 16:9</li>
+                    <li>배경: Gray-100 (이미지 없을 시)</li>
+                    <li>보더 반경: rounded-t-xl (상단만)</li>
+                    <li>객체 맞춤: object-cover</li>
+                </ul>
+            </li>
+            <li><strong>내용 영역</strong>:
+                <ul>
+                    <li>패딩: 16px (space-4)</li>
+                    <li>배경: White</li>
+                    <li>보더 반경: rounded-b-xl (하단만)</li>
+                </ul>
+            </li>
+            <li><strong>프로젝트 이름</strong>:
+                <ul>
+                    <li>폰트: font-sans, text-base, font-semibold</li>
+                    <li>색상: Gray-800</li>
+                    <li>말줄임: 1줄</li>
+                </ul>
+            </li>
+            <li><strong>메타 정보</strong>:
+                <ul>
+                    <li>폰트: text-xs, font-normal</li>
+                    <li>색상: Gray-500</li>
+                    <li>레이아웃: Flexbox (시간 + 배지)</li>
+                </ul>
+            </li>
+            <li><strong>타입 배지</strong>:
+                <ul>
+                    <li>배경: Primary-100 (Chat) / Accent-100 (Canvas)</li>
+                    <li>텍스트: Primary-700 / Accent-700</li>
+                    <li>패딩: 4px 8px</li>
+                    <li>보더 반경: rounded-full</li>
+                    <li>폰트: text-xs, font-medium</li>
+                </ul>
+            </li>
+            <li><strong>전체 카드</strong>:
+                <ul>
+                    <li>보더: 1px solid Gray-200</li>
+                    <li>보더 반경: rounded-xl</li>
+                    <li>그림자: shadow</li>
+                    <li>호버: shadow-md, translateY(-2px)</li>
+                    <li>커서: pointer</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>View All Button</h4>
+        <ul>
+            <li><strong>위치</strong>: 그리드 하단 중앙</li>
+            <li><strong>여백</strong>: 상단 24px</li>
+            <li><strong>스타일</strong>: Ghost Button</li>
+            <li><strong>텍스트</strong>: "View All Projects" + 화살표 아이콘</li>
+        </ul>
+
+        <p><strong>Empty State</strong> (프로젝트 없을 시)</p>
+        <ul>
+            <li>아이콘: 빈 폴더 아이콘 (48px, Gray-400)</li>
+            <li>텍스트: "No projects yet. Start creating!"</li>
+            <li>버튼: "Create New Project"</li>
+        </ul>
+
+        <hr>
+
+        <h3>3.3 Gallery Highlights Section</h3>
+
+        <h4>레이아웃</h4>
+        <ul>
+            <li><strong>여백</strong>: 상단 80px (space-20)</li>
+            <li><strong>최대 너비</strong>: 1400px</li>
+        </ul>
+
+        <h4>Section Header</h4>
+        <ul>
+            <li><strong>제목</strong>: "Gallery Highlights"</li>
+            <li><strong>폰트</strong>: font-heading, text-2xl (24px), font-bold</li>
+            <li><strong>색상</strong>: Gray-800</li>
+            <li><strong>여백 하단</strong>: 24px (space-6)</li>
+            <li><strong>추가 요소</strong>:
+                <ul>
+                    <li>우측에 "Explore Gallery →" 링크 (text-sm, Primary-600)</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Design Grid</h4>
+        <ul>
+            <li><strong>레이아웃</strong>: 6개 카드, Grid (3열 2행)</li>
+            <li><strong>간격</strong>: 24px (space-6)</li>
+            <li><strong>반응형</strong>:
+                <ul>
+                    <li>Desktop (≥1280px): 3열</li>
+                    <li>Tablet (768-1279px): 2열</li>
+                    <li>Mobile (&lt;768px): 1열</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Design Card</h4>
+<pre><code>구조:
+┌─────────────────────┐
+│                     │
+│                     │
+│   [디자인 이미지]     │ (1:1 비율)
+│                     │
+│                     │
+│  ┌─────────────────┐│ (호버 시 오버레이)
+│  │ Design Name     ││
+│  │ Jan 22, 2026    ││
+│  └─────────────────┘│
+└─────────────────────┘
+</code></pre>
+        <ul>
+            <li><strong>이미지</strong>:
+                <ul>
+                    <li>비율: 1:1 (정사각형)</li>
+                    <li>배경: Gray-100 (이미지 없을 시)</li>
+                    <li>보더 반경: rounded-xl</li>
+                    <li>객체 맞춤: object-cover</li>
+                </ul>
+            </li>
+            <li><strong>오버레이</strong> (호버 시):
+                <ul>
+                    <li>배경: linear-gradient(to top, rgba(0,0,0,0.7), transparent)</li>
+                    <li>위치: 하단</li>
+                    <li>패딩: 16px</li>
+                    <li>애니메이션: Fade In (0.2s)</li>
+                </ul>
+            </li>
+            <li><strong>디자인 이름</strong>:
+                <ul>
+                    <li>폰트: font-sans, text-base, font-semibold</li>
+                    <li>색상: White</li>
+                    <li>말줄임: 1줄</li>
+                </ul>
+            </li>
+            <li><strong>생성 날짜</strong>:
+                <ul>
+                    <li>폰트: text-xs, font-normal</li>
+                    <li>색상: Gray-300</li>
+                </ul>
+            </li>
+            <li><strong>전체 카드</strong>:
+                <ul>
+                    <li>보더: 1px solid Gray-200</li>
+                    <li>보더 반경: rounded-xl</li>
+                    <li>그림자: shadow</li>
+                    <li>호버: shadow-lg, scale(1.02)</li>
+                    <li>커서: pointer</li>
+                    <li>전환: 0.3s ease-out</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Explore Gallery Button</h4>
+        <ul>
+            <li><strong>위치</strong>: 그리드 하단 중앙</li>
+            <li><strong>여백</strong>: 상단 24px</li>
+            <li><strong>스타일</strong>: Ghost Button</li>
+            <li><strong>텍스트</strong>: "Explore Gallery" + 화살표 아이콘</li>
+        </ul>
+
+        <p><strong>Empty State</strong> (디자인 없을 시)</p>
+        <ul>
+            <li>아이콘: 빈 갤러리 아이콘 (48px, Gray-400)</li>
+            <li>텍스트: "No designs yet. Create your first design!"</li>
+            <li>버튼: "Start Creating"</li>
+        </ul>
+
+        <hr>
+
+        <h3>3.4 Quick Stats Section (선택 사항)</h3>
+
+        <h4>레이아웃</h4>
+        <ul>
+            <li><strong>위치</strong>: Gallery 섹션 하단</li>
+            <li><strong>여백</strong>: 상단 60px, 하단 80px</li>
+            <li><strong>정렬</strong>: 중앙</li>
+        </ul>
+
+        <h4>내용</h4>
+        <ul>
+            <li><strong>레이아웃</strong>: Flexbox, 가로 배치</li>
+            <li><strong>간격</strong>: 32px (space-8)</li>
+            <li><strong>각 Stat</strong>:
+                <ul>
+                    <li>아이콘 + 레이블 + 값</li>
+                    <li>예: "📊 Total Designs: 24"</li>
+                </ul>
+            </li>
+            <li><strong>폰트</strong>: text-sm, font-medium</li>
+            <li><strong>색상</strong>: Gray-600</li>
+            <li><strong>구분선</strong>: 1px solid Gray-300 (각 stat 사이)</li>
+        </ul>
+
+        <p><strong>Stats 항목</strong>:</p>
+        <ol>
+            <li>Total Designs: 24</li>
+            <li>This Week: 5</li>
+            <li>Storage: 2.3GB</li>
+        </ol>
+
+        <hr>
+
+        <h2>4. 상태 & 인터랙션</h2>
+
+        <h3>4.1 로딩 상태</h3>
+
+        <p><strong>Initial Load</strong></p>
+        <ul>
+            <li>Hero Section: 즉시 표시</li>
+            <li>Recent Projects: 스켈레톤 로딩 (4개 카드 형태)</li>
+            <li>Gallery Highlights: 스켈레톤 로딩 (6개 카드 형태)</li>
+        </ul>
+
+        <p><strong>Skeleton Card</strong></p>
+<pre><code>┌─────────────────────┐
+│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  │ (애니메이션 펄스)
+│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  │
+├─────────────────────┤
+│ ▓▓▓▓▓▓▓▓▓          │
+│ ▓▓▓▓▓  ▓▓▓         │
+└─────────────────────┘
+</code></pre>
+
+        <h3>4.2 Empty States</h3>
+        <ul>
+            <li><strong>No Projects</strong>
+                <ul>
+                    <li>아이콘 + 메시지 + CTA 버튼</li>
+                    <li>중앙 정렬</li>
+                    <li>부드러운 색상 (Gray-400)</li>
+                </ul>
+            </li>
+            <li><strong>No Designs</strong>
+                <ul>
+                    <li>동일한 패턴</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>4.3 클릭 인터랙션</h3>
+        <ul>
+            <li><strong>CTA Cards</strong>
+                <ul>
+                    <li>클릭 → 해당 페이지로 이동 (<code>/chat/new</code> 또는 <code>/canvas/new</code>)</li>
+                    <li>애니메이션: Scale down (0.98) on tap</li>
+                </ul>
+            </li>
+            <li><strong>Project Card</strong>
+                <ul>
+                    <li>클릭 → 프로젝트 상세 페이지 (<code>/chat/:sessionId</code> 또는 <code>/canvas/:projectId</code>)</li>
+                </ul>
+            </li>
+            <li><strong>Design Card</strong>
+                <ul>
+                    <li>클릭 → 디자인 상세 페이지 (<code>/gallery/:designId</code>)</li>
+                </ul>
+            </li>
+            <li><strong>View All / Explore Buttons</strong>
+                <ul>
+                    <li>클릭 → 해당 페이지로 이동 (<code>/gallery</code> 또는 <code>/gallery/projects</code>)</li>
+                </ul>
+            </li>
+        </ul>
+
+        <hr>
+
+        <h2>5. 애니메이션 (Framer Motion)</h2>
+
+        <h3>5.1 페이지 진입</h3>
+<pre><code class="language-jsx">const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 }
+};
+
+const pageTransition = {
+  duration: 0.3,
+  ease: [0, 0, 0.2, 1]
+};
+</code></pre>
+
+        <h3>5.2 Hero Section</h3>
+<pre><code class="language-jsx">const heroVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
+</code></pre>
+
+        <h3>5.3 CTA Cards</h3>
+<pre><code class="language-jsx">const cardHover = {
+  y: -6,
+  boxShadow: "0 8px 20px rgba(20, 174, 92, 0.3)",
+  borderColor: "#3FCF98",
+  backgroundColor: "#E8F9F0"
+};
+
+const cardTap = {
+  scale: 0.98
+};
+</code></pre>
+
+        <h3>5.4 Project/Design Cards</h3>
+<pre><code class="language-jsx">const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
+
+const gridVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08
+    }
+  }
+};
+</code></pre>
+
+        <hr>
+
+        <h2>6. 반응형 디자인</h2>
+
+        <h3>6.1 Desktop (≥ 1280px)</h3>
+        <ul>
+            <li>Hero Section: 최대 너비 1200px</li>
+            <li>Project Grid: 4열</li>
+            <li>Gallery Grid: 3열</li>
+            <li>모든 요소 정상 표시</li>
+        </ul>
+
+        <h3>6.2 Tablet (768px - 1279px)</h3>
+        <ul>
+            <li>Hero Section: 최대 너비 900px</li>
+            <li>CTA Cards: 2개 유지 (약간 작게)</li>
+            <li>Project Grid: 2열</li>
+            <li>Gallery Grid: 2열</li>
+            <li>Quick Stats: 세로 배치</li>
+        </ul>
+
+        <h3>6.3 Mobile (&lt; 768px)</h3>
+        <ul>
+            <li>Hero Section: 패딩 감소 (좌우 16px)</li>
+            <li>Heading: text-3xl (30px)</li>
+            <li>CTA Cards: 세로 배치 (1열)</li>
+            <li>Project Grid: 1열</li>
+            <li>Gallery Grid: 1열</li>
+            <li>Quick Stats: 세로 배치, 간격 감소</li>
+        </ul>
+
+        <hr>
+
+        <h2>7. 접근성</h2>
+
+        <h3>7.1 시맨틱 HTML</h3>
+<pre><code class="language-html">&lt;main&gt;
+  &lt;section aria-label="Hero"&gt;
+    &lt;h1&gt;Transform Your Ideas into Shoe Designs&lt;/h1&gt;
+    &lt;p&gt;AI-powered design generation...&lt;/p&gt;
+    &lt;div role="group" aria-label="Quick actions"&gt;
+      &lt;a href="/chat/new" aria-label="Start text to design"&gt;...&lt;/a&gt;
+      &lt;a href="/canvas/new" aria-label="Start sketch to design"&gt;...&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+  
+  &lt;section aria-label="Recent Projects"&gt;
+    &lt;h2&gt;Recent Projects&lt;/h2&gt;
+    &lt;div role="list"&gt;...&lt;/div&gt;
+  &lt;/section&gt;
+  
+  &lt;section aria-label="Gallery Highlights"&gt;
+    &lt;h2&gt;Gallery Highlights&lt;/h2&gt;
+    &lt;div role="list"&gt;...&lt;/div&gt;
+  &lt;/section&gt;
+&lt;/main&gt;
+</code></pre>
+
+        <h3>7.2 키보드 네비게이션</h3>
+        <ul>
+            <li>모든 카드 및 버튼: Tab으로 접근 가능</li>
+            <li>Enter/Space: 활성화</li>
+            <li>포커스 표시: outline 2px solid Primary-500</li>
+        </ul>
+
+        <h3>7.3 ARIA 레이블</h3>
+        <ul>
+            <li>모든 링크 및 버튼: 명확한 aria-label</li>
+            <li>이미지: alt 텍스트 제공</li>
+            <li>섹션: aria-label로 구분</li>
+        </ul>
+
+        <hr>
+
+        <h2>8. 성능 최적화</h2>
+
+        <h3>8.1 이미지 최적화</h3>
+        <ul>
+            <li><strong>썸네일</strong>: WebP 포맷, 최대 400x400px</li>
+            <li><strong>Lazy Loading</strong>: Intersection Observer 사용</li>
+            <li><strong>Placeholder</strong>: 블러 이미지 또는 Gray-100 배경</li>
+        </ul>
+
+        <h3>8.2 데이터 로딩</h3>
+        <ul>
+            <li><strong>Recent Projects</strong>: 최대 4개만 로드</li>
+            <li><strong>Gallery Highlights</strong>: 최대 6개만 로드</li>
+            <li><strong>Pagination</strong>: "View All" 클릭 시 전체 로드</li>
+        </ul>
+
+        <h3>8.3 애니메이션</h3>
+        <ul>
+            <li><strong>Reduced Motion</strong>: prefers-reduced-motion 미디어 쿼리 지원</li>
+            <li><strong>GPU 가속</strong>: transform, opacity만 사용</li>
+        </ul>
+
+        <hr>
+
+        <h2>9. 구현 예시 (React + Framer Motion)</h2>
+
+        <h3>9.1 HomePage Component</h3>
+<pre><code class="language-jsx">import { motion } from 'framer-motion';
+import { MessageCircle, Palette, ArrowRight } from 'lucide-react';
+
+const HomePage = () => {
+  return (
+    &lt;motion.main
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className="max-w-[1400px] mx-auto px-8"
+    &gt;
+      &lt;HeroSection /&gt;
+      &lt;RecentProjectsSection /&gt;
+      &lt;GalleryHighlightsSection /&gt;
+      &lt;QuickStatsSection /&gt;
+    &lt;/motion.main&gt;
+  );
+};
+</code></pre>
+
+        <h3>9.2 HeroSection Component</h3>
+<pre><code class="language-jsx">const HeroSection = () => {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
+  return (
+    &lt;motion.section
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="max-w-[1200px] mx-auto text-center pt-20 pb-16"
+    &gt;
+      &lt;motion.h1
+        variants={itemVariants}
+        className="font-heading text-4xl font-bold text-gray-800"
+      &gt;
+        Transform Your Ideas into Shoe Designs
+      &lt;/motion.h1&gt;
+      
+      &lt;motion.p
+        variants={itemVariants}
+        className="text-lg text-gray-600 mt-4"
+      &gt;
+        AI-powered design generation and management platform for footwear designers
+      &lt;/motion.p>
+
+      &lt;motion.div
+        variants={itemVariants}
+        className="flex gap-6 justify-center mt-12"
+      &gt;
+        &lt;CTACard
+          icon={MessageCircle}
+          title="Text to Design"
+          description="Chat with AI to create designs"
+          href="/chat/new"
+        /&gt;
+        &lt;CTACard
+          icon={Palette}
+          title="Sketch to Design"
+          description="Draw on canvas and generate designs"
+          href="/canvas/new"
+        /&gt;
+      &lt;/motion.div&gt;
+    &lt;/motion.section&gt;
+  );
+};
+</code></pre>
+
+        <h3>9.3 CTACard Component</h3>
+<pre><code class="language-jsx">const CTACard = ({ icon: Icon, title, description, href }) => {
+  return (
+    &lt;motion.a
+      href={href}
+      className="w-[280px] p-8 bg-white border-2 border-primary-200 rounded-2xl shadow hover:bg-primary-50 hover:border-primary-400 hover:shadow-primary cursor-pointer"
+      whileHover={{ y: -6 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
+    &gt;
+      &lt;Icon size={48} className="text-primary-500 mb-4" /&gt;
+      &lt;h3 className="font-heading text-xl font-semibold text-gray-800 mb-2"&gt;
+        {title}
+      &lt;/h3&gt;
+      &lt;p className="text-sm text-gray-600 mb-6"&gt;
+        {description}
+      &lt;/p&gt;
+      &lt;button className="w-full px-6 py-3 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600 flex items-center justify-center gap-2"&gt;
+        Start &lt;ArrowRight size={16} /&gt;
+      &lt;/button&gt;
+    &lt;/motion.a&gt;
+  );
+};
+</code></pre>
+
+        <hr>
+
+        <h2>10. 참고 문서</h2>
+        <ul>
+            <li><a href="../design/layout-template.md">Layout Template</a></li>
+            <li><a href="../design/design-system.md">Design System</a></li>
+            <li><a href="../service-summary.md">Service Summary</a></li>
+        </ul>
+    </div>
+</body>
+</html>

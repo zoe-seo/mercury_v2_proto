@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercury - Unified Design Brief UI Specification</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --text-color: #1f2937;
+            --bg-color: #f3f4f6;
+            --content-bg: #ffffff;
+            --code-bg: #f9fafb;
+            --border-color: #e5e7eb;
+            --heading-color: #111827;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--content-bg);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        h1, h2, h3, h4 {
+            color: var(--heading-color);
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+        h1 {
+            font-size: 2.25rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5em;
+            margin-top: 0;
+        }
+        h2 {
+            font-size: 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.3em;
+        }
+        h3 {
+            font-size: 1.5rem;
+            color: #374151;
+        }
+        h4 {
+            font-size: 1.25rem;
+            color: #4b5563;
+        }
+        p {
+            margin-bottom: 1em;
+        }
+        ul, ol {
+            padding-left: 1.5em;
+            margin-bottom: 1em;
+        }
+        li {
+            margin-bottom: 0.5em;
+        }
+        code {
+            background-color: var(--code-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+            color: #db2777;
+            border: 1px solid var(--border-color);
+        }
+        pre {
+            background-color: #1f2937;
+            color: #f3f4f6;
+            padding: 1.5em;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border: none;
+            font-size: 0.9em;
+        }
+        blockquote {
+            border-left: 4px solid var(--primary-color);
+            margin: 1em 0;
+            padding: 0.5em 0 0.5em 1em;
+            background-color: #eff6ff;
+            color: #1e40af;
+            border-radius: 0 4px 4px 0;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid var(--border-color);
+            margin: 2em 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75em;
+            text-align: left;
+        }
+        th {
+            background-color: var(--code-bg);
+            font-weight: 600;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: block;
+            margin: 1em 0;
+        }
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 9999px;
+            color: #065f46;
+            background-color: #d1fae5;
+            margin-left: 0.5em;
+        }
+        .meta-info {
+            background-color: #f8fafc;
+            padding: 1em;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2em;
+        }
+        .meta-info ul {
+            margin: 0;
+            padding-left: 1.2em;
+            list-style-type: none;
+        }
+        .meta-info li {
+            margin-bottom: 0.25em;
+            color: #64748b;
+        }
+        .meta-info strong {
+            color: #334155;
+            min-width: 80px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mercury - Unified Design Brief UI Specification</h1>
+
+        <div class="meta-info">
+            <h2>문서 정보</h2>
+            <ul>
+                <li><strong>작성일:</strong> 2026-01-25</li>
+                <li><strong>작성자:</strong> UI/UX Designer</li>
+                <li><strong>상태:</strong> <span class="badge">Approved ✅</span></li>
+                <li><strong>버전:</strong> 1.0</li>
+                <li><strong>관련 요구사항:</strong> <a href="../requirements/req-007-design-brief.md">REQ-007: Unified Design Brief</a></li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <h2>1. 컴포넌트 개요</h2>
+        <p><code>DesignBriefForm</code>은 Chat과 Canvas에서 공통으로 사용되는 입력 폼 컴포넌트입니다.</p>
+
+        <h3>1.1 주요 특징</h3>
+        <ul>
+            <li><strong>Progressive Disclosure</strong>: 3단 아코디언 구조로 복잡도 관리</li>
+            <li><strong>Smart Validation</strong>: 필수 필드 하이라이팅</li>
+            <li><strong>Responsive</strong>: 사이드바(320px)와 채팅 버블(max-width) 모두 대응</li>
+        </ul>
+
+        <hr>
+
+        <h2>2. 상세 UI 설계</h2>
+
+        <h3>2.1 "Clean & Modern" Single View Layout</h3>
+        <p>더 이상 아코디언을 사용하지 않으며, 한 눈에 들어오는 직관적인 폼 레이아웃을 사용합니다. 불필요한 마케팅 정보는 디자인 단계에서 숨기거나 최소화합니다.</p>
+
+        <h4>Header Area</h4>
+        <ul>
+            <li><strong>Theme Input</strong> (Large, Bold): 디자인의 핵심 주제</li>
+            <li><strong>Reference Image Selection</strong>: 썸네일 표시 및 변경 버튼</li>
+        </ul>
+
+        <h4>Specs Grid (2 Columns)</h4>
+        <ul>
+            <li><strong>Column 1 (Identity)</strong>: Target Audience, Tone</li>
+            <li><strong>Column 2 (Physical)</strong>: Category, Material, Sole</li>
+        </ul>
+
+        <h4>Colors & Styles</h4>
+        <ul>
+            <li><strong>Key Colors</strong>: Color Swatches (Circular)</li>
+            <li><strong>Style Keywords</strong>: Tag clouds</li>
+        </ul>
+
+        <p><em>(Marketing Section은 별도 'Advanced' 토글로 숨김 처리)</em></p>
+
+        <h3>2.2 Shared Styling (Tailwind)</h3>
+<pre><code class="language-jsx">// Main Container
+&lt;div className="flex flex-col gap-6 p-6 bg-white/95 backdrop-blur rounded-xl border border-gray-100 shadow-sm"&gt;
+  
+  // Theme Hero Input
+  &lt;div&gt;
+    &lt;label className="text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1 block"&gt;Design Theme&lt;/label&gt;
+    &lt;input className="w-full text-lg font-bold text-gray-800 bg-transparent border-b border-gray-200 focus:border-primary-500 focus:outline-none pb-2 placeholder-gray-300" placeholder="Ultra Modern Runner..." /&gt;
+  &lt;/div&gt;
+
+  // Specs Grid
+  &lt;div className="grid grid-cols-2 gap-4"&gt;
+     // ... distinct spec inputs
+  &lt;/div&gt;
+
+  // Visual Reference
+  &lt;div className="aspect-video bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-200 hover:border-primary-200 cursor-pointer transition-colors"&gt;
+     &lt;span className="text-sm text-gray-400"&gt;Select Reference&lt;/span&gt;
+  &lt;/div&gt;
+
+&lt;/div&gt;
+</code></pre>
+
+        <hr>
+
+        <h2>3. Usage Contexts</h2>
+
+        <h3>3.1 Chat Interface (Session Menu)</h3>
+        <ul>
+            <li><strong>Entrance</strong>: Chat 세션 목록의 <code>More(...)</code> 메뉴 -> <code>Brief Settings</code> 클릭.</li>
+            <li><strong>Interaction</strong>: 모달(Dialog) 형태로 <code>DesignBriefForm</code> 표시.</li>
+            <li><strong>Auto-Trigger</strong>: AI가 채팅 중 유의미한 정보를 감지하면 <code>[Design Brief Proposed]</code> 버블을 띄움 (기존 로직 유지). 단, 버블 내 'Review' 클릭 시 모달이 뜸.</li>
+        </ul>
+
+        <h3>3.2 Canvas Interface (Sidebar)</h3>
+        <ul>
+            <li><strong>Entrance</strong>: Canvas 페이지 진입 시 좌측 사이드바.</li>
+            <li><strong>Persistence</strong>: Auto-save.</li>
+            <li><strong>Reference Gallery Integration</strong>: 사이드바 내 'Reference Gallery' 탭에서 이미지를 클릭하면, 해당 이미지의 스타일 프롬프트가 Design Brief의 현재 필드들을 덮어씀 (Clone).</li>
+        </ul>
+
+        <hr>
+
+        <h2>4. Visual Assets</h2>
+        <p><em>Step 4에서 생성된 프로토타입 참조</em></p>
+        <p>
+            <img src="C:/Users/tjwn1/.gemini/antigravity/brain/a284f670-c7b5-439b-8558-9c112181f36d/canvas_with_sidebar_1769346372371.png" alt="Prototype">
+            <small><em>(Note: Image source path may need update based on local environment)</em></small>
+        </p>
+
+    </div>
+</body>
+</html>

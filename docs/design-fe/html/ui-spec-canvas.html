@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercury - Canvas Interface UI Specification</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --text-color: #1f2937;
+            --bg-color: #f3f4f6;
+            --content-bg: #ffffff;
+            --code-bg: #f9fafb;
+            --border-color: #e5e7eb;
+            --heading-color: #111827;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--content-bg);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        h1, h2, h3, h4 {
+            color: var(--heading-color);
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+        h1 {
+            font-size: 2.25rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5em;
+            margin-top: 0;
+        }
+        h2 {
+            font-size: 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.3em;
+        }
+        h3 {
+            font-size: 1.5rem;
+            color: #374151;
+        }
+        h4 {
+            font-size: 1.25rem;
+            color: #4b5563;
+        }
+        p {
+            margin-bottom: 1em;
+        }
+        ul, ol {
+            padding-left: 1.5em;
+            margin-bottom: 1em;
+        }
+        li {
+            margin-bottom: 0.5em;
+        }
+        code {
+            background-color: var(--code-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+            color: #db2777;
+            border: 1px solid var(--border-color);
+        }
+        pre {
+            background-color: #1f2937;
+            color: #f3f4f6;
+            padding: 1.5em;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border: none;
+            font-size: 0.9em;
+        }
+        blockquote {
+            border-left: 4px solid var(--primary-color);
+            margin: 1em 0;
+            padding: 0.5em 0 0.5em 1em;
+            background-color: #eff6ff;
+            color: #1e40af;
+            border-radius: 0 4px 4px 0;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid var(--border-color);
+            margin: 2em 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75em;
+            text-align: left;
+        }
+        th {
+            background-color: var(--code-bg);
+            font-weight: 600;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: block;
+            margin: 1em 0;
+        }
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 9999px;
+            color: #065f46;
+            background-color: #d1fae5;
+            margin-left: 0.5em;
+        }
+        .meta-info {
+            background-color: #f8fafc;
+            padding: 1em;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2em;
+        }
+        .meta-info ul {
+            margin: 0;
+            padding-left: 1.2em;
+            list-style-type: none;
+        }
+        .meta-info li {
+            margin-bottom: 0.25em;
+            color: #64748b;
+        }
+        .meta-info strong {
+            color: #334155;
+            min-width: 80px;
+            display: inline-block;
+        }
+        .alert {
+            border-left: 4px solid #f59e0b;
+            background-color: #fef3c7;
+            color: #92400e;
+            padding: 1em;
+            margin: 1em 0;
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mercury - Canvas Interface UI Specification</h1>
+
+        <div class="meta-info">
+            <h2>문서 정보</h2>
+            <ul>
+                <li><strong>작성일:</strong> 2026-01-24</li>
+                <li><strong>작성자:</strong> UI/UX Designer</li>
+                <li><strong>상태:</strong> <span class="badge">Approved ✅</span></li>
+                <li><strong>버전:</strong> 1.1</li>
+                <li><strong>관련 문서:</strong>
+                    <ul>
+                        <li><a href="../design/layout-template.md">Layout Template</a></li>
+                        <li><a href="../design/design-system.md">Design System</a></li>
+                        <li><a href="../requirements/req-003-sketch-to-design.md">REQ-003: Sketch to Design</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <h2>0. Visual Reference</h2>
+        <p>
+            <img src="C:/Users/tjwn1/.gemini/antigravity/brain/9d371308-6155-483f-b793-7a228aa5d41b/canvas_ui_mockup_1769212907504.png" alt="Canvas UI Mockup">
+            <small><em>(Note: Image source path may need update based on local environment)</em></small>
+        </p>
+
+        <hr>
+
+        <h2>1. 페이지 개요</h2>
+
+        <h3>1.1 목적</h3>
+        <ul>
+            <li><strong>Infinite Creativity</strong>: 제한 없는 무한 캔버스에서 아이데이션 및 스케치</li>
+            <li><strong>AI Integration</strong>: 스케치 및 텍스트 프롬프트를 결합한 실시간 이미지 생성</li>
+            <li><strong>Smart Segmentation</strong>: AI 분석을 통한 신발 파트 자동 인식 및 선택</li>
+            <li><strong>Precision Editing</strong>: Inpainting(마스킹)을 통한 정교한 부분 수정</li>
+        </ul>
+
+        <h3>1.2 URL</h3>
+        <ul>
+            <li><code>/canvas</code> (캔버스 목록 페이지)</li>
+            <li><code>/canvas/:canvasId</code> (캔버스 편집 페이지)</li>
+        </ul>
+
+        <div class="alert">
+            <strong>NOTE:</strong> 새 캔버스 생성은 Home 페이지의 "Sketch to Design" 버튼을 통해 모달에서 이루어집니다.
+        </div>
+
+        <h3>1.3 레이아웃 모드</h3>
+        <ul>
+            <li><strong>Full-screen Mode</strong>: 몰입감을 위해 Side Navigation을 숨기고 캔버스 영역을 최대화합니다.</li>
+            <li><strong>Fixed Header</strong>: 상단 네비게이션은 유지하되, <code>Sketch to Design</code> 탭이 활성화됩니다.</li>
+        </ul>
+
+        <h3>1.4 기술 스택 (Technical Stack)</h3>
+        <ul>
+            <li><strong>Canvas Engine</strong>: <strong>Fabric.js</strong></li>
+        </ul>
+
+        <h3>1.5 저장 및 히스토리 관리 (Persistence)</h3>
+        <ul>
+            <li><strong>자동 저장 (Auto-save)</strong>:
+                <ul>
+                    <li>사용자의 편집이 멈춘 후 <strong>2초(Debounce)</strong> 뒤에 자동으로 서버에 상태를 저장합니다.</li>
+                    <li>툴 변경(<code>Select</code> -&gt; <code>Brush</code> 등) 시에는 즉시 저장을 트리거합니다.</li>
+                </ul>
+            </li>
+            <li><strong>UI 피드백</strong>:
+                <ul>
+                    <li>저장 중: 툴바 우측에 <code>Saving...</code> 텍스트와 Spinner 표시.</li>
+                    <li>저장 완료: <code>Saved</code> 아이콘(체크 표시)으로 변경.</li>
+                </ul>
+            </li>
+            <li><strong>실행 취소 범위 (Undo/Redo Scope)</strong>:
+                <ul>
+                    <li><strong>Drawing</strong>: 각 브러시 획(Stroke) 단위로 기록.</li>
+                    <li><strong>Object</strong>: 생성, 삭제, 이동, 크기 조정, 속성 변경(색상, 투명도 등) 완료 시 기록.</li>
+                    <li><strong>Layer</strong>: 레이어 순서 변경, 잠금/숨김 상태 변경 기록.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <hr>
+
+        <h2>2. 컴포넌트 트리</h2>
+<pre><code>CanvasPage
+├── Header (Global)
+└── MainContent (Full Screen, Relative)
+    ├── InfiniteCanvas (Z-0)
+    │   ├── GridBackground
+    │   └── CanvasLayer
+    │
+    ├── SpecPanel (Z-40, Left Sidebar, 320px)
+    │   └── DesignBriefForm
+    │
+    ├── TopToolbar (Z-50, Floating, Top Center)
+    │   ├── CanvasName (Editable)
+    │   ├── NodeCreationGroup (Sketch, Image, Text)
+    │   ├── ToolsGroup (Select, Hand)
+    │   ├── Divider
+    │   └── ActionsGroup (Undo, Redo, Zoom, Save Status)
+    │
+    ├── PropertiesPanel (Z-40, Floating, Top Left)
+    │   └── ContextualControls (Color, Stroke, Font, etc.)
+    │
+    ├── LayersPanel (Z-40, Floating, Top Right)
+    │   └── LayerList
+    │
+    │   ├── SegmentsPanel (Z-40, Floating, Bottom Right)
+    │   │   └── PartList (Vamp, Outsole, etc.)
+    │
+    └── AIPromptPanel (Z-50, Floating, Contextual)
+        ├── PromptInput
+        ├── GenerateButton
+        └── InpaintControls
+
+CanvasListPage
+├── Header (Global)
+└── MainContent
+    ├── PageHeader
+    │   ├── Title ("My Canvases")
+    │   └── CreateButton
+    ├── FilterBar
+    │   ├── SearchInput
+    │   └── ProjectFilter
+    └── CanvasGrid
+        └── CanvasCard[] (Thumbnail, Name, Date, Actions)
+
+CreateCanvasModal
+├── ModalHeader ("Create New Canvas")
+├── TabBar
+│   ├── NewCanvasTab
+│   └── RecentCanvasesTab
+├── NewCanvasForm
+│   ├── CanvasNameInput
+│   ├── ProjectSelect
+│   └── CreateButton
+└── RecentCanvasList
+    ├── CanvasItem[] (Name, Date)
+    └── ViewAllLink
+</code></pre>
+
+        <hr>
+
+        <h2>3. 상세 인터페이스 설계</h2>
+
+        <h3>3.1 Top Toolbar (Main Tools)</h3>
+        <p>사용자가 가장 빈번하게 사용하는 도구들을 모아둔 플로팅 바입니다. <strong>브러시, 지우개 등의 편집 도구는 개별 노드 선택 시 나타나는 Context Toolbar로 이동되었습니다.</strong></p>
+        <ul>
+            <li><strong>위치</strong>: 상단 중앙 (Header 하단 24px 지점)</li>
+            <li><strong>스타일</strong>:
+                <ul>
+                    <li>배경: White (#FFFFFF)</li>
+                    <li>그림자: <code>shadow-lg</code></li>
+                    <li>보더: <code>rounded-full</code> (완전한 둥근 모서리)</li>
+                    <li>패딩: 8px 24px</li>
+                    <li>애니메이션: Slide Down (진입 시)</li>
+                </ul>
+            </li>
+        </ul>
+
+        <p><strong>구성 요소 (좌에서 우로)</strong>:</p>
+
+        <h4>1. Canvas Name</h4>
+        <ul>
+            <li>현재 캔버스 이름 표시 및 수정</li>
+            <li>클릭 시 인풋 필드로 전환되어 이름 변경 가능</li>
+        </ul>
+
+        <p><em>(Divider)</em></p>
+
+        <h4>2. 노드 생성 그룹</h4>
+        <ol>
+            <li><strong>Add Sketch Node</strong>: 768x768px 스케치 프레임 생성
+                <ul>
+                    <li>아이콘: 연필 + 사각형 프레임</li>
+                    <li>클릭 시 캔버스 중앙에 빈 스케치 노드 생성</li>
+                </ul>
+            </li>
+            <li><strong>Upload Image</strong>: 이미지 파일 업로드
+                <ul>
+                    <li>아이콘: <code>ImageIcon</code></li>
+                    <li>제약: 최대 10MB, 2048px</li>
+                    <li>자동 리사이징 후 768x768px 노드 생성</li>
+                </ul>
+            </li>
+            <li><strong>Add Text</strong>: 텍스트 메모 노드 생성
+                <ul>
+                    <li>아이콘: <code>Type</code></li>
+                    <li>가변 크기, 기본 폰트 Inter 16px</li>
+                </ul>
+            </li>
+        </ol>
+
+        <p><em>(Divider)</em></p>
+
+        <h4>3. 도구 그룹 (View Controls)</h4>
+        <ol start="4">
+            <li><strong>Select (V)</strong>: 노드 선택 및 이동 (Default)</li>
+            <li><strong>Hand (H)</strong>: 캔버스 패닝 (Spacebar Hold)</li>
+        </ol>
+
+        <p><em>(Divider)</em></p>
+
+        <h4>4. 액션 그룹</h4>
+        <ol start="6">
+            <li><strong>Undo (Cmd+Z)</strong>: 실행 취소</li>
+            <li><strong>Redo (Cmd+Shift+Z)</strong>: 다시 실행</li>
+            <li><strong>Zoom Indicator</strong>: 현재 확대율 표시 (클릭 시 100% 리셋)</li>
+        </ol>
+
+        <p><em>(Divider)</em></p>
+
+        <h4>5. 상태 표시</h4>
+        <ol start="9">
+            <li><strong>Node Count</strong>: <code>12/20</code> 형태로 현재 노드 수 표시
+                <ul>
+                    <li>20개 도달 시 빨간색으로 강조</li>
+                </ul>
+            </li>
+            <li><strong>Save Status</strong>:
+                <ul>
+                    <li><code>Saving...</code> (Spinner)</li>
+                    <li><code>Saved</code> (Check)</li>
+                    <li><code>Error</code> (Alert)</li>
+                </ul>
+            </li>
+        </ol>
+
+        <hr>
+
+        <h3>3.2 Spec Side Panel (Design Brief)</h3>
+        <p><a href="../requirements/req-007-design-brief.md">REQ-007</a>에 정의된 <strong>Unified Design Brief</strong>를 입력하는 고정 패널입니다.</p>
+        <ul>
+            <li><strong>위치</strong>: 화면 왼쪽 고정 (Left Sidebar)</li>
+            <li><strong>너비</strong>: 320px</li>
+            <li><strong>동작</strong>: Collapsible (접었을 때 너비 0px, 헤더의 햄버거 메뉴로 토글)</li>
+            <li><strong>내용</strong>: <code>DesignBriefForm</code> (공통 컴포넌트)</li>
+            <li><strong>Persistence</strong>:
+                <ul>
+                    <li>수정 시 즉시 자동 저장 (Canvas 메타데이터로 저장)</li>
+                    <li><code>Global Context</code>로서 이후 생성되는 모든 이미지에 프롬프트로 주입됨.</li>
+                </ul>
+            </li>
+            <li><strong>상세 UI</strong>: <a href="../design-fe/ui-spec-design-brief.md">ui-spec-design-brief.md</a> 참조.</li>
+        </ul>
+
+        <hr>
+
+        <h3>3.3 Context Toolbar (Node-Specific Tools)</h3>
+        <p>특정 노드(Sketch, Image 등)를 선택했을 때 해당 객체 상단에 나타나는 플로팅 툴바입니다. 노드 타입에 따라 필요한 편집 도구를 제공합니다.</p>
+        <ul>
+            <li><strong>위치</strong>: 선택된 객체의 상단 중앙 (Floating)</li>
+            <li><strong>스타일</strong>: <code>rounded-full</code>, <code>bg-white</code>, <code>shadow-lg</code>, <code>border-gray-200</code></li>
+            <li><strong>애니메이션</strong>: Fade In/Out + Scale</li>
+        </ul>
+
+        <p><strong>상태별 모드</strong>:</p>
+
+        <h4>A. 기본 선택 상태 (Selection State)</h4>
+        <ul>
+            <li><strong>Edit/Inpaint Button</strong>:
+                <ul>
+                    <li>Sketch Node: "Edit Sketch" (Brush 아이콘)</li>
+                    <li>Image Node: "Inpaint" (Brush 아이콘)</li>
+                    <li>클릭 시 <strong>[Edit Mode]</strong>로 진입</li>
+                </ul>
+            </li>
+            <li><strong>Close/Delete Button</strong>: 선택 해제 또는 삭제 (X 아이콘)</li>
+        </ul>
+
+        <h4>B. 편집 모드 (Edit Mode)</h4>
+        <p>노드 내부 편집을 위한 도구가 활성화된 상태입니다.</p>
+        <ul>
+            <li><strong>Editing Badge</strong>: "EDITING" 상태 표시</li>
+            <li><strong>Drawing Tools</strong>:
+                <ul>
+                    <li><strong>Brush</strong>: 그리기 도구 (Active 시 Primary Color)</li>
+                    <li><strong>Eraser</strong>: 지우개 도구</li>
+                </ul>
+            </li>
+            <li><strong>Palette Button</strong>: 색상/브러시 크기 설정 패널 토글 (Properties Panel 연동)</li>
+            <li><strong>Done Button</strong>: 편집 완료 및 저장 (Check 아이콘)</li>
+        </ul>
+
+        <hr>
+
+        <h3>3.3 Properties Panel (Contextual Settings)</h3>
+        <p>현재 활성화된 도구의 세부 속성을 제어하는 패널입니다. Context Toolbar에서 편집 모드 진입 시 브러시 설정을 제공합니다.</p>
+        <ul>
+            <li><strong>위치</strong>: 왼쪽 상단 (Floating)</li>
+            <li><strong>구성</strong>:
+                <ul>
+                    <li><strong>Brush Mode</strong>:
+                        <ul>
+                            <li><strong>Size</strong>: 브러시 크기 슬라이더 (1px ~ 100px)</li>
+                            <li><strong>Color</strong>: HEX 입력, Color Palette, Eyedropper</li>
+                        </ul>
+                    </li>
+                    <li><strong>Select Mode</strong>:
+                        <ul>
+                            <li>선택된 객체의 좌표(X, Y) 및 크기(W, H) 정보 (Read-only)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <hr>
+
+        <h3>3.4 Layers Panel</h3>
+        <p>복잡한 작업을 관리하기 위한 레이어 패널입니다.</p>
+        <ul>
+            <li><strong>위치</strong>: 오른쪽 상단 (Header 아래 24px, 오른쪽 24px)</li>
+            <li><strong>크기</strong>: 너비 260px, 최대 높이 500px</li>
+            <li><strong>스타일</strong>: <code>rounded-xl</code>, <code>bg-white/90</code>, <code>shadow-md</code></li>
+        </ul>
+
+        <p><strong>기능</strong>:</p>
+        <ul>
+            <li><strong>Drag & Drop</strong>: 레이어 순서 변경 (Z-index 자동 조정)</li>
+            <li><strong>Visibility</strong>: 눈 아이콘 토글 (Show/Hide) -&gt; 서버 API <code>PUT /layers/{id}</code> 연동</li>
+            <li><strong>Lock</strong>: 자물쇠 아이콘 토글 (잠금/해제) -&gt; 서버 API 연동 (<code>is_locked</code> 필드)</li>
+            <li><strong>Opacity</strong>: 레이어별 불투명도 조절 (0~1.0) -&gt; 서버 API 연동 (<code>opacity</code> 필드)</li>
+            <li><strong>Blending Mode</strong>: (Advanced) Multiply, Screen, Overlay 등 지원</li>
+        </ul>
+
+        <h3>3.5 Unified Image Context Panel (Generation & Edit)</h3>
+        <p>이미지 노드가 선택되었을 때 활성화되는 통합 패널입니다. 기존의 <code>Segments Panel</code>과 <code>AI Prompt Panel</code>이 통합되어, 프롬프팅부터 마스킹(세그멘테이션/인페인팅)까지 한 곳에서 처리합니다.</p>
+        <ul>
+            <li><strong>위치</strong>: 선택된 이미지 노드 하단 중앙 (Floating)</li>
+        </ul>
+
+        <h4>A. Prompt Section (Top)</h4>
+        <ul>
+            <li><strong>Prompt Input</strong>: 텍스트 입력창 (멀티라인)</li>
+            <li><strong>Generate Button</strong>: 생성 실행</li>
+            <li><strong>Style/Settings</strong>: (Collapsible) 스타일 프리셋, 시드 값 등</li>
+        </ul>
+
+        <h4>B. Masking & Tools Section (Middle, Collapsible)</h4>
+        <ul>
+            <li><strong>Mode Toggle</strong>:
+                <ul>
+                    <li><code>Smart Select</code> (Segmentation)</li>
+                    <li><code>Manual Brush</code> (Inpainting)</li>
+                </ul>
+            </li>
+            <li><strong>Smart Select Mode</strong>:
+                <ul>
+                    <li><strong>Analyze Button</strong>: 이미지 파트 분석 실행</li>
+                    <li><strong>Parts Tags</strong>: 분석된 파트 리스트 (예: <code>[Sole]</code>, <code>[Upper]</code>)</li>
+                    <li><strong>Interaction</strong>: 태그 클릭 시 해당 영역 마스킹 추가/제거</li>
+                </ul>
+            </li>
+            <li><strong>Manual Brush Mode</strong>:
+                <ul>
+                    <li><strong>Tools</strong>: <code>Add Mask (Brush)</code>, <code>Remove Mask (Eraser)</code></li>
+                    <li><strong>Settings</strong>: Brush Size 슬라이더</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>C. Action Section (Bottom)</h4>
+        <ul>
+            <li><strong>Inpaint/Generate Fill</strong>: 현재 마스킹된 영역에 대해 생성 실행</li>
+            <li><strong>Variations</strong>: 전체 변형 생성</li>
+        </ul>
+
+        <hr>
+
+        <h3>3.6 Context Menu (Right Click)</h3>
+        <p>전문 디자이너의 생산성을 위해 캔버스 객체 위에서 마우스 우클릭 시 퀵 메뉴를 제공합니다.</p>
+        <ul>
+            <li><strong>표시 조건</strong>: 단일 또는 다중 객체 선택 후 우클릭</li>
+            <li><strong>메뉴 항목</strong>:
+                <ul>
+                    <li><strong>Duplicate (Cmd+D)</strong>: 객체 복제</li>
+                    <li><strong>Delete (Del)</strong>: 객체 삭제</li>
+                    <li><strong>Bring to Front (Cmd+])</strong>: 맨 앞으로 가져오기</li>
+                    <li><strong>Send to Back (Cmd+[)</strong>: 맨 뒤로 보내기</li>
+                    <li><strong>Group/Ungroup (Cmd+G)</strong>: 그룹화/해제</li>
+                    <li><strong>Analyze (Segmentation)</strong>: 해당 이미지 파트 분석 실행</li>
+                </ul>
+            </li>
+            <li><strong>스타일</strong>: <code>bg-white</code>, <code>shadow-md</code>, <code>rounded-md</code>, <code>py-1</code>, <code>text-sm</code>, <code>min-w-[160px]</code></li>
+        </ul>
+
+        <h3>3.7 Design Packaging Workshop (제품 패키징 워크샵)</h3>
+        <p>캔버스 내 특정 결과물을 공식적인 '디자인 패키지(DP)'로 변환하기 위한 전문 워크플로우입니다.</p>
+        <ul>
+            <li><strong>표시 형태</strong>: 캔버스 중앙에 거대하게 위치하는 센터 모달 (캔버스 배경이 살짝 비치는 반투명 Backdrop 적용).</li>
+            <li><strong>특징</strong>: 무거운 비동기 작업(이미지 생성)을 FE에서 안정적으로 모니터링하며 진행.</li>
+        </ul>
+
+        <p><strong>워크샵 시나리오 (3-Step Production Line)</strong>:</p>
+        <ol>
+            <li><strong>Step 1: 메타데이터 및 설정 (Input Phase)</strong>
+                <ul>
+                    <li>좌측: 선택한 원본 이미지 (Reference) 고정.</li>
+                    <li>우측: 제목, 설명(디자인 의도), 사용 소재, 타겟 브랜드 정보 입력.</li>
+                    <li>입력 완료 시 하단 '생산 라인' 활성화.</li>
+                </ul>
+            </li>
+            <li><strong>Step 2: 비동기 리소스 생성 (Streaming Pipeline)</strong>
+                <ul>
+                    <li>서버 Worker에서 비동기로 생성되는 에셋들을 실시간으로 확인.</li>
+                    <li><strong>6-view Standard Shots</strong>: 전/후/좌/우/상/하 6개 뷰가 하나씩 생겨나는 Progressive UI.</li>
+                    <li><strong>Lifestyle Model Shot</strong>: 신발을 착용한 연출 컷 (Shimmer 효과와 함께 로딩).</li>
+                    <li><strong>3D Asset</strong>: 진행률 바(Progress Bar)를 통해 생성 상태 표시.</li>
+                    <li>완료된 2D 시안은 개별적으로 '다시 생성(Retry)' 버튼 제공.</li>
+                </ul>
+            </li>
+            <li><strong>Step 3: 최종 검토 및 전송 (Finalize Phase)</strong>
+                <ul>
+                    <li>모든(또는 필수) 리소스 확인 후 <strong>[디자인 패키지 확정]</strong> 버튼 클릭.</li>
+                    <li>결과물이 갤러리로 이동하며, 캔버스로 돌아가거나 갤러리로 이동할 수 있는 완료 팝업 표시.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <p><strong>UX 정책</strong>:</p>
+        <ul>
+            <li>작업이 길어질 경우 "캔버스에서 계속 작업하며 알림 받기"를 통해 모달을 닫을 수 있음 (백그라운드 생성 유지).</li>
+            <li>완료 시 우측 상단 토스트 알림으로 성공 여부 공지.</li>
+        </ul>
+
+        <hr>
+
+        <h2>4. 시각적 디테일 (Visual Details)</h2>
+
+        <h3>4.1 Infinite Canvas</h3>
+        <ul>
+            <li><strong>Background</strong>: <code>Gray-50</code> (#FAFAFA)</li>
+            <li><strong>Grid Pattern</strong>:
+                <ul>
+                    <li>Type: Dot Grid</li>
+                    <li>Color: <code>Gray-300</code></li>
+                    <li>Spacing: 20px</li>
+                    <li>Major Grid: 100px (약간 더 진한 점)</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>4.2 Selection UI</h3>
+        <ul>
+            <li><strong>Bounding Box</strong>: <code>Primary-500</code> (1px Solid Line)</li>
+            <li><strong>Corner Handles</strong>: White square with <code>Primary-500</code> border & shadow</li>
+            <li><strong>Rotate Handle</strong>: 상단 중앙 돌출 핸들</li>
+        </ul>
+
+        <h3>4.3 Loading State (Generation)</h3>
+        <ul>
+            <li>생성 중인 영역에 <code>Skeleton UI</code> 또는 <code>Blur Hash</code> 적용</li>
+            <li>테두리에 <strong>Shimmering Gradient Animation</strong> (Primary to Accent color) 적용</li>
+            <li>"Generating..." 텍스트와 함께 진행률 표시</li>
+        </ul>
+
+        <hr>
+
+        <h2>5. 단축키 (Keyboard Shortcuts)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Command</th>
+                    <th>Key (Mac)</th>
+                    <th>Key (Win)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Tools</strong></td>
+                    <td>Select</td>
+                    <td><code>V</code></td>
+                    <td><code>V</code></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Hand</td>
+                    <td><code>H</code> or <code>Space</code></td>
+                    <td><code>H</code> or <code>Space</code></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Brush</td>
+                    <td><code>B</code></td>
+                    <td><code>B</code></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Eraser</td>
+                    <td><code>E</code></td>
+                    <td><code>E</code></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Text</td>
+                    <td><code>T</code></td>
+                    <td><code>T</code></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Rectangle</td>
+                    <td><code>R</code></td>
+                    <td><code>R</code></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Circle</td>
+                    <td><code>O</code></td>
+                    <td><code>O</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Action</strong></td>
+                    <td>Undo</td>
+                    <td><code>Cmd + Z</code></td>
+                    <td><code>Ctrl + Z</code></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Redo</td>
+                    <td><code>Cmd + Shift + Z</code></td>
+                    <td><code>Ctrl + Shift + Z</code></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Duplicate</td>
+                    <td><code>Cmd + D</code></td>
+                    <td><code>Ctrl + D</code></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Group</td>
+                    <td><code>Cmd + G</code></td>
+                    <td><code>Ctrl + G</code></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Ungroup</td>
+                    <td><code>Cmd + Shift + G</code></td>
+                    <td><code>Ctrl + Shift + G</code></td>
+                </tr>
+                <tr>
+                    <td><strong>View</strong></td>
+                    <td>Zoom In</td>
+                    <td><code>Cmd + +</code></td>
+                    <td><code>Ctrl + +</code></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Zoom Out</td>
+                    <td><code>Cmd + -</code></td>
+                    <td><code>Ctrl + -</code></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Reset Zoom</td>
+                    <td><code>Shift + 0</code></td>
+                    <td><code>Shift + 0</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr>
+
+        <h2>6. 모바일 대응 (Responsive)</h2>
+        <p>캔버스는 데스크톱 중심의 기능이므로 모바일에서는 기능을 제한적으로 제공합니다.</p>
+        <ul>
+            <li><strong>Tablet (iPad 등)</strong>:
+                <ul>
+                    <li>모든 기능 지원</li>
+                    <li>터치 제스처 (Two-finger pan, Pinch zoom) 지원</li>
+                </ul>
+            </li>
+            <li><strong>Mobile (Phone)</strong>:
+                <ul>
+                    <li><strong>View Only Mode</strong>로 기본 동작</li>
+                    <li>상단에 "Edit on Desktop for best experience" 배너 표시</li>
+                    <li>간단한 텍스트 프롬프트 수정 및 갤러리 확인만 가능</li>
+                </ul>
+            </li>
+        </ul>
+
+        <hr>
+
+        <h2>7. 노드 기반 UI (Node-Based Interface)</h2>
+
+        <h3>7.1 노드 타입별 시각적 구분</h3>
+
+        <h4>Sketch 노드</h4>
+        <ul>
+            <li><strong>크기</strong>: 768x768px 고정</li>
+            <li><strong>테두리</strong>: 점선 (Dashed), Gray-300</li>
+            <li><strong>배경</strong>: White with subtle grid pattern</li>
+            <li><strong>아이콘</strong>: 좌상단에 연필 아이콘 배지</li>
+        </ul>
+
+        <h4>Image 노드</h4>
+        <ul>
+            <li><strong>크기</strong>: 768x768px 고정</li>
+            <li><strong>테두리</strong>: 실선 (Solid), Gray-200</li>
+            <li><strong>배경</strong>: 이미지로 채워짐</li>
+            <li><strong>배지</strong>: 좌상단에 출처 표시
+                <ul>
+                    <li>업로드: 📁 아이콘</li>
+                    <li>AI 생성: ✨ 아이콘</li>
+                    <li>Chat 가져오기: 💬 아이콘</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Text 노드</h4>
+        <ul>
+            <li><strong>크기</strong>: 가변 (Auto-resize)</li>
+            <li><strong>테두리</strong>: 없음 (선택 시만 표시)</li>
+            <li><strong>배경</strong>: 투명</li>
+            <li><strong>스타일</strong>: 기본 Inter 16px, Black</li>
+        </ul>
+
+        <h3>7.2 노드 연결선 (Connection Lines)</h3>
+        <p><strong>시각화</strong>:</p>
+        <ul>
+            <li><strong>선 스타일</strong>: 점선 (Dashed), Gray-400, 1px</li>
+            <li><strong>화살표</strong>: 부모 -> 자식 방향</li>
+            <li><strong>색상 변화</strong>:
+                <ul>
+                    <li>기본: Gray-400</li>
+                    <li>호버: Primary-500</li>
+                    <li>선택된 노드의 연결선: Primary-600, 2px</li>
+                </ul>
+            </li>
+        </ul>
+
+        <p><strong>렌더링</strong>:</p>
+        <ul>
+            <li>SVG Path로 구현</li>
+            <li>베지어 곡선 사용 (자연스러운 곡선)</li>
+            <li>Z-index: 노드 아래, 그리드 위</li>
+        </ul>
+
+        <p><strong>토글</strong>:</p>
+        <ul>
+            <li>Toolbar의 "Show Connections" 체크박스</li>
+            <li>기본값: ON</li>
+            <li>OFF 시 모든 연결선 숨김</li>
+        </ul>
+
+        <h3>7.3 AI Prompt Panel - Add Reference 기능</h3>
+        <p><strong>위치</strong>: AI Prompt Panel 하단</p>
+        <p><strong>UI 구성</strong>:</p>
+<pre><code>┌─────────────────────────────────┐
+│ Prompt: [입력 영역]              │
+├─────────────────────────────────┤
+│ References (2)                  │
+│ ┌─────┐ ┌─────┐ [+ Add]        │
+│ │ 📁  │ │ ✨  │                │
+│ │Ref 1│ │Ref 2│                │
+│ └─────┘ └─────┘                │
+├─────────────────────────────────┤
+│ [Generate]                      │
+└─────────────────────────────────┘
+</code></pre>
+
+        <p><strong>인터랙션</strong>:</p>
+        <ol>
+            <li>"+ Add Reference" 버튼 클릭</li>
+            <li>캔버스 커서가 선택 모드로 변경</li>
+            <li>다른 노드 클릭 시 참조로 추가</li>
+            <li>참조 노드는 썸네일 + 타입 아이콘으로 표시</li>
+            <li>X 버튼으로 참조 제거</li>
+        </ol>
+
+        <p><strong>제약</strong>:</p>
+        <ul>
+            <li>최대 5개 참조 노드</li>
+            <li>자기 자신은 참조 불가</li>
+        </ul>
+
+        <h3>7.4 노드 최대 제한 경고</h3>
+        <p><strong>트리거</strong>: 20개 노드 도달 시 새 노드 생성 시도</p>
+        <p><strong>UI</strong>:</p>
+        <ul>
+            <li>모달 또는 Toast 알림</li>
+            <li>메시지: "캔버스당 최대 20개 노드까지 생성할 수 있습니다. 기존 노드를 삭제 후 다시 시도해주세요."</li>
+            <li>버튼: "확인"</li>
+        </ul>
+
+        <p><strong>시각적 피드백</strong>:</p>
+        <ul>
+            <li>Toolbar의 Node Count가 빨간색으로 강조</li>
+            <li>노드 생성 버튼들이 비활성화 (Disabled)</li>
+        </ul>
+
+        <h3>7.5 노드 배치 규칙</h3>
+        <p><strong>새 노드 생성 시</strong>:</p>
+        <ul>
+            <li>Sketch/Text/Upload Image: 캔버스 중앙</li>
+            <li>AI 생성 이미지: 부모 노드 오른쪽 50px 간격</li>
+        </ul>
+
+        <p><strong>자동 배치 로직</strong>:</p>
+<pre><code class="language-typescript">const placeGeneratedImage = (parentNode: Node) => {
+  return {
+    x: parentNode.x + parentNode.width + 50,
+    y: parentNode.y
+  };
+};
+</code></pre>
+
+        <hr>
+
+        <h2>7. 참고 (Canvas 생성 및 관리 UI)</h2>
+
+        <h3>7.1 CreateCanvasModal</h3>
+        <p><strong>트리거</strong>: Home 페이지에서 "Sketch to Design" 버튼 클릭<br>
+        <strong>위치</strong>: 화면 중앙 모달 (Overlay)<br>
+        <strong>크기</strong>: 500px (width) x Auto (height)</p>
+
+        <h4>Tab 1: New Canvas (기본 활성)</h4>
+        <ul>
+            <li><strong>Canvas Name Input</strong>: Placeholder "Untitled Canvas", Max 100자</li>
+            <li><strong>Project Select</strong>: Dropdown (Optional)</li>
+            <li><strong>Create & Start Button</strong>: API 호출 후 리다이렉트</li>
+        </ul>
+
+        <h4>Tab 2: Recent Canvases</h4>
+        <ul>
+            <li><strong>Recent Canvas List</strong>: 최근 5개 목록</li>
+            <li><strong>View All Canvases Link</strong></li>
+        </ul>
+
+        <h3>7.2 CanvasListPage (캔버스 목록 페이지)</h3>
+        <p><strong>URL</strong>: <code>/canvas</code><br>
+        <strong>레이아웃</strong>: Standard Layout (Header + Title + Filter + Grid)</p>
+
+        <h4>Canvas Grid</h4>
+        <ul>
+            <li><strong>Card Info</strong>: Thumbnail, Name, Last Modified, Actions (Open/Delete)</li>
+            <li><strong>Empty State</strong>: "No canvases yet"</li>
+        </ul>
+
+        <h3>7.3 Canvas Name Editor (TopToolbar 내)</h3>
+        <p><strong>기복 상태</strong>: 텍스트 표시<br>
+        <strong>편집 모드</strong>: 클릭 시 Input 전환, Enter 저장, ESC 취소</p>
+
+        <p>본 UI 스펙은 <strong>Fabric.js</strong> 라이브러리의 표준 기능을 기준으로 작성되었습니다.</p>
+
+    </div>
+</body>
+</html>

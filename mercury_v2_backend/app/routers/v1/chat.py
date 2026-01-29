@@ -1,44 +1,43 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+import uuid
+from celery.result import AsyncResult
 
 from app.deps.db import get_db
 from app.services import chat_service
 from app.schemas.chat import (
     ChatSessionCreate,
-    ChatSessionUpdate,
     ChatSessionResponse,
     ChatSessionListResponse,
-    ChatMessageCreate,
-    ChatMessageResponse,
-    ChatMessageListResponse
+    ChatUserAction,
+    SessionHistoryResponse,
+    ChatMessageResponse
 )
+from app.schemas.responses import SuccessResponse
 from app.core.auth import get_current_user
 from app.core.exceptions import NotFoundException
 from app.models.user import User
+from app.celery_app import celery_app
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 @router.get("/sessions", response_model=ChatSessionListResponse)
 async def get_sessions(
-    project_id: str | None = Query(None, description="Filter by project ID"),
-    page: int = Query(1, ge=1, description="Page number"),
-    page_size: int = Query(20, ge=1, le=100, description="Items per page"),
+    project_id: str | None = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get user's chat sessions with pagination."""
-    import uuid as uuid_lib
-    
+    """Get user's chat sessions."""
     project_uuid = None
     if project_id:
         try:
-            project_uuid = uuid_lib.UUID(project_id)
+            project_uuid = uuid.UUID(project_id)
         except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid project ID format"
-            )
+            raise HTTPException(status_code=400, detail="Invalid project ID")
     
     sessions, pagination = await chat_service.get_sessions(
         db, current_user.id, project_uuid, page, page_size
@@ -57,7 +56,6 @@ async def create_session(
     db: AsyncSession = Depends(get_db)
 ):
     """Create a new chat session."""
-    from app.schemas.responses import SuccessResponse
     session = await chat_service.create_session(db, current_user.id, data)
     return SuccessResponse(
         data=ChatSessionResponse.model_validate(session),
@@ -65,396 +63,137 @@ async def create_session(
     )
 
 
-
-@router.get("/sessions/{session_id}", response_model=ChatSessionResponse)
-async def get_session(
+@router.get("/sessions/{session_id}", response_model=SessionHistoryResponse)
+async def get_session_history(
     session_id: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get chat session by ID."""
+    """Get session history."""
     try:
-        import uuid as uuid_lib
-        session_uuid = uuid_lib.UUID(session_id)
+        session_uuid = uuid.UUID(session_id)
     except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid session ID format"
-        )
+        raise HTTPException(status_code=400, detail="Invalid session ID")
     
     try:
         session = await chat_service.get_session_by_id(db, session_uuid, current_user.id)
-        return ChatSessionResponse.model_validate(session)
-    except NotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
-
-
-@router.put("/sessions/{session_id}", response_model=ChatSessionResponse)
-async def update_session(
-    session_id: str,
-    data: ChatSessionUpdate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Update a chat session."""
-    try:
-        import uuid as uuid_lib
-        session_uuid = uuid_lib.UUID(session_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid session ID format"
-        )
-    
-    try:
-        session = await chat_service.update_session(db, session_uuid, current_user.id, data)
-        return ChatSessionResponse.model_validate(session)
-    except NotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
-
-
-@router.delete("/sessions/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_session(
-    session_id: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Delete (archive) a chat session."""
-    try:
-        import uuid as uuid_lib
-        session_uuid = uuid_lib.UUID(session_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid session ID format"
-        )
-    
-    try:
-        await chat_service.delete_session(db, session_uuid, current_user.id)
-        return None
-    except NotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
-
-
-@router.get("/sessions/{session_id}/messages", response_model=ChatMessageListResponse)
-async def get_messages(
-    session_id: str,
-    limit: int = Query(50, ge=1, le=200, description="Maximum number of messages"),
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Get messages for a chat session."""
-    try:
-        import uuid as uuid_lib
-        session_uuid = uuid_lib.UUID(session_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid session ID format"
-        )
-    
-    try:
-        messages = await chat_service.get_messages(db, session_uuid, current_user.id, limit)
-        return ChatMessageListResponse(
-            messages=[ChatMessageResponse.model_validate(m) for m in messages]
-        )
-    except NotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
-
-
-@router.post("/sessions/{session_id}/messages", response_model=ChatMessageResponse, status_code=status.HTTP_201_CREATED)
-async def create_message(
-    session_id: str,
-    data: ChatMessageCreate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Create a new chat message."""
-    try:
-        import uuid as uuid_lib
-        session_uuid = uuid_lib.UUID(session_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid session ID format"
-        )
-    
-    try:
-        message = await chat_service.create_message(db, session_uuid, current_user.id, data)
-        return ChatMessageResponse.model_validate(message)
-    except NotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
-
-
-@router.post("/sessions/{session_id}/messages/stream")
-async def stream_message(
-    session_id: str,
-    data: ChatMessageCreate,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Stream a chat message with SSE (Server-Sent Events)."""
-    from fastapi.responses import StreamingResponse
-    import uuid as uuid_lib
-    
-    try:
-        session_uuid = uuid_lib.UUID(session_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid session ID format"
-        )
-    
-    try:
-        # Stream the response
-        response_stream = chat_service.stream_message(
-            db, session_uuid, current_user.id, data
-        )
+        messages = await chat_service.get_messages(db, session_uuid, current_user.id, limit=100)
         
+        # Helper to map widget from metadata
+        def map_msg(m):
+            resp = ChatMessageResponse.model_validate(m)
+            if m.message_metadata and "widget" in m.message_metadata:
+                resp.widget = m.message_metadata["widget"]
+            return resp
+
+        return SessionHistoryResponse(
+            session_id=session.id,
+            messages=[map_msg(m) for m in messages],
+            current_step=session.session_state
+        )
+    except NotFoundException as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/sessions/{session_id}/message")
+async def send_message(
+    session_id: str,
+    action: ChatUserAction,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Send message and stream response (SSE)."""
+    try:
+        session_uuid = uuid.UUID(session_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid session ID")
+
+    try:
+        stream = chat_service.stream_rich_message(
+            db, session_uuid, current_user.id, action
+        )
+
         return StreamingResponse(
-            response_stream,
+            stream,
             media_type="text/event-stream",
             headers={
                 "Cache-Control": "no-cache",
-                "Connection": "keep-alive",
-                "X-Accel-Buffering": "no"  # Disable nginx buffering
+                "Connection": "keep-alive"
             }
         )
     except NotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/sessions/{session_id}/generate-outlines", status_code=status.HTTP_202_ACCEPTED)
-async def generate_outlines(
-    session_id: str,
-    prompt: str,
-    count: int = 4,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Generate outline images asynchronously."""
-    import uuid as uuid_lib
-    from app.tasks.image_tasks import generate_outline_images_task
-    
-    try:
-        session_uuid = uuid_lib.UUID(session_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid session ID format"
-        )
-    
-    try:
-        # Verify session belongs to user
-        await chat_service.get_session_by_id(db, session_uuid, current_user.id)
-        
-        # Start Celery task
-        task = generate_outline_images_task.delay(session_id, prompt, count)
-        
-        return {
-            "task_id": task.id,
-            "status": "processing"
-        }
-    except NotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
-
-
-@router.post("/sessions/{session_id}/generate-design", status_code=status.HTTP_202_ACCEPTED)
-async def generate_design(
-    session_id: str,
-    prompt: str,
-    selected_outline_id: str | None = None,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Generate final design image asynchronously."""
-    import uuid as uuid_lib
-    from app.tasks.image_tasks import generate_design_image_task
-    
-    try:
-        session_uuid = uuid_lib.UUID(session_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid session ID format"
-        )
-    
-    try:
-        # Verify session belongs to user
-        await chat_service.get_session_by_id(db, session_uuid, current_user.id)
-        
-        # Start Celery task
-        task = generate_design_image_task.delay(session_id, prompt, selected_outline_id)
-        
-        return {
-            "task_id": task.id,
-            "status": "processing"
-        }
-    except NotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
-
-
-@router.get("/sessions/{session_id}/images")
-async def get_session_images(
-    session_id: str,
-    image_type: str | None = Query(None, description="Filter by image type (outline/rendered)"),
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Get generated images for a session."""
-    import uuid as uuid_lib
-    from sqlalchemy import select
-    from app.models.generated_image import GeneratedImage
-    from app.schemas.image import GeneratedImageResponse, GeneratedImageListResponse
-    
-    try:
-        session_uuid = uuid_lib.UUID(session_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid session ID format"
-        )
-    
-    try:
-        # Verify session belongs to user
-        await chat_service.get_session_by_id(db, session_uuid, current_user.id)
-        
-        # Build query
-        query_filter = [GeneratedImage.session_id == session_uuid]
-        if image_type:
-            query_filter.append(GeneratedImage.image_type == image_type)
-        
-        query = (
-            select(GeneratedImage)
-            .where(*query_filter)
-            .order_by(GeneratedImage.created_at.desc())
-        )
-        
-        result = await db.execute(query)
-        images = list(result.scalars().all())
-        
-        return GeneratedImageListResponse(
-            images=[GeneratedImageResponse.model_validate(img) for img in images],
-            total=len(images)
-        )
-    except NotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
-
-
-@router.get("/tasks/{task_id}/status")
+@router.get("/tasks/{task_id}")
 async def get_task_status(
     task_id: str,
     current_user: User = Depends(get_current_user)
 ):
-    """Get Celery task status."""
-    from celery.result import AsyncResult
-    from app.celery_app import celery_app
-    from app.schemas.image import TaskStatusResponse
-    
-    task = AsyncResult(task_id, app=celery_app)
-    
-    response = TaskStatusResponse(
-        task_id=task_id,
-        status=task.state,
-        result=task.result if task.ready() else None,
-        progress=task.info if task.state == 'PROGRESS' else None
-    )
-    
-    return response
+    """
+    Get Celery task status for image generation.
 
+    Returns:
+        - status: pending | generating | completed | failed
+        - progress: Progress info (if available)
+        - image_id: Generated image ID (if completed)
+        - image_url: Image URL (if completed)
+    """
+    try:
+        task = AsyncResult(task_id, app=celery_app)
 
-@router.get("/sessions/{session_id}/brief") # Should add response_model=SuccessResponse[DesignBriefResponse] ideally but generics are tricky in decorator sometimes without proper typing
-async def get_design_brief(
-    session_id: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Get design brief for a chat session."""
-    import uuid as uuid_lib
-    from app.services import design_brief_service
-    from app.schemas.design_brief import DesignBriefResponse
-    from app.schemas.responses import SuccessResponse
-    
-    try:
-        session_uuid = uuid_lib.UUID(session_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid session ID format"
-        )
-    
-    try:
-        brief = await design_brief_service.get_chat_brief(db, session_uuid, current_user.id)
-        return SuccessResponse(
-            data=DesignBriefResponse.model_validate(brief),
-            message="Success"
-        )
-    except NotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
+        if task.state == 'PENDING':
+            return {
+                "status": "pending",
+                "task_id": task_id
+            }
+        elif task.state == 'PROGRESS':
+            return {
+                "status": "generating",
+                "task_id": task_id,
+                "progress": task.info
+            }
+        elif task.state == 'SUCCESS':
+            # Task completed successfully
+            # Result should be the image_id from the task
+            image_id = task.result
 
-@router.put("/sessions/{session_id}/brief")
-async def upsert_design_brief(
-    session_id: str,
-    data: dict, # Using dict to avoid circular imports? No, local import is fine.
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Upsert design brief for a chat session."""
-    import uuid as uuid_lib
-    from app.services import design_brief_service
-    from app.schemas.design_brief import DesignBriefUpdate, DesignBriefResponse
-    from app.schemas.responses import SuccessResponse
-    
-    try:
-        session_uuid = uuid_lib.UUID(session_id)
-        # Validate body
-        update_data = DesignBriefUpdate(**data)
-    except ValueError:
-         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid ID format or Body data"
-        )
-    
-    try:
-        brief = await design_brief_service.upsert_chat_brief(
-            db, session_uuid, current_user.id, update_data
-        )
-        return SuccessResponse(
-            data=DesignBriefResponse.model_validate(brief),
-            message="Success"
-        )
-    except NotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
+            # Fetch image URL from database
+            from app.models.generated_image import GeneratedImage
+            from sqlalchemy import select
+            from app.deps.db import get_db
+
+            async for db in get_db():
+                result = await db.execute(
+                    select(GeneratedImage).where(GeneratedImage.id == uuid.UUID(image_id))
+                )
+                image = result.scalar_one_or_none()
+
+                if image:
+                    return {
+                        "status": "completed",
+                        "task_id": task_id,
+                        "image_id": image_id,
+                        "image_url": image.image_url
+                    }
+                else:
+                    return {
+                        "status": "completed",
+                        "task_id": task_id,
+                        "image_id": image_id,
+                        "image_url": None
+                    }
+        elif task.state == 'FAILURE':
+            return {
+                "status": "failed",
+                "task_id": task_id,
+                "error": str(task.info)
+            }
+        else:
+            return {
+                "status": task.state.lower(),
+                "task_id": task_id
+            }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching task status: {str(e)}")

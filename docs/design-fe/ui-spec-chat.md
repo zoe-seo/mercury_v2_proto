@@ -1,254 +1,131 @@
-# Mercury - Chat Interface UI Specification
+# Mercury - Chat Interface UI Specification (Rich Chat Mode)
 
 ## 문서 정보
-- **작성일**: 2026-01-22
+- **작성일**: 2026-01-26
 - **작성자**: UI/UX Designer
 - **상태**: ✅ Approved
-- **버전**: 1.0
+- **버전**: 3.0 (Rich Chat Update)
 - **관련 문서**: 
-  - [Layout Template](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/design/layout-template.md)
+  - [REQ-002: Text to Design](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/requirements/req-002-text-to-design.md)
   - [Design System](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/design/design-system.md)
-
----
-
-## 0. Visual Reference
-![Chat Interface Visual Prototype](C:/Users/tjwn1/.gemini/antigravity/brain/9c49e5eb-7f9e-4610-9263-9b26050e52ce/chat_page_design_1769092395357.png)
 
 ---
 
 ## 1. 페이지 개요
 
 ### 1.1 목적
-- AI와의 대화를 통해 신발 디자인 요구사항 수집 및 이미지 생성
-- 생성된 디자인의 히스토리 관리 및 캔버스로의 연동
+- **단계별 가이드(Guided Workflow)** 로직을 **자연스러운 대화(Chat)** 경험으로 녹여냄
+- AI가 제안(Propose)하고, 사용자가 선택(Select)하는 턴제 방식
+- "대화형 위젯(Interactive Widgets)"을 통해 텍스트 입력을 최소화
 
-### 1.2 URL
-- `/chats` (Empty State - 새 대화 시작)
-- `/chats/:sessionId` (기존 세션)
-
-### 1.3 사용자 흐름 (Lazy Session Creation)
-
-#### 새 대화 시작
-```
-1. Home → "Text to Design" 클릭
-2. /chats 페이지 로드
-   - 왼쪽: SessionListPanel (기존 세션 목록)
-   - 오른쪽: Empty State (환영 메시지 + 추천 프롬프트)
-3. 사용자가 첫 메시지 입력 + Send
-4. 세션 자동 생성 (title: 첫 메시지 요약)
-5. /chats/{session_id}로 리다이렉트
-6. AI 응답 시작
-```
-
-#### 기존 세션 재개
-```
-1. SessionListPanel에서 세션 클릭
-2. /chats/{session_id}로 이동
-3. 기존 대화 히스토리 로드
-4. 대화 계속
-```
-
-### 1.4 레이아웃 참조
-- **Header**: Top Navigation (Project > Text to Design 활성화)
-- **Side Nav**: 없음 (제거됨)
-- **Main Content**: 2-Column Layout (Session List + Chat Area)
-
+### 1.2 UX 컨셉: "Rich Chat Stream"
+- **Unified Stream**: 가이드, 선택지, 결과물이 모두 하나의 타임라인에 흐름
+- **Interactive Bubbles**: 단순 텍스트가 아닌, 기능이 포함된 리치 버블(Rich Bubble)
+- **AI-Led**: AI가 설명과 함께 선택지를 제시(Offer)하는 구조
 
 ---
 
-## 2. 컴포넌트 트리
+## 2. 레이아웃 구조
 
-```
-ChatPage
-├── Header (Global)
-└── MainContent (Flex Container, Full Height)
-    ├── SessionListPanel (Left, 320px)
-    │   ├── SearchBar
-    │   ├── NewChatButton
-    │   └── SessionList (Scrollable)
-    │       └── SessionItem
-    └── ChatArea (Right, 100%)
-        ├── MessageList (Scrollable)
-        │   ├── SystemMessage
-        │   ├── UserMessage
-        │   ├── AIMessage
-        │   │   └── GeneratedImageGrid
-        │   └── TypingIndicator
-        ├── InputContainer (Fixed)
-        │   ├── ReferenceUpload
-        │   ├── TextArea
-        │   └── SendButton
-        └── ImageHistorySlider (Fixed Bottom, 120px)
-            ├── SliderHeader (Optional)
-            └── ImageThumbnailList
-```
+### 2.1 2-Column Standard Layout
+- 일반적인 메신저 UI 구조 채택
+- **Left Panel (300px, Collapsible)**: Session List (History)
+- **Main Area (Flex Fill)**: Chat Conversation Stream
+
+### 2.2 Global Elements
+- **Header**: Session Title, [New Chat] 버튼
+- **Floating Status**: 상단에 작게 현재 단계 표시 (예: "Step 2/5: Outline")
 
 ---
 
-## 3. 섹션별 상세 설계
+## 3. 컴포넌트 상세: Chat Stream
 
-### 3.1 Session List Panel
+### 3.1 AI Rich Message (핵심)
+AI 메시지는 **[텍스트 설명] + [인터랙티브 위젯]** 의 구조를 가집니다.
 
-#### 레이아웃
-- **위치**: 왼쪽 사이드
-- **너비**: 320px (고정)
-- **배경**: Gray-50 (#FAFAFA)
-- **보더**: 오른쪽 1px solid Gray-200
+#### A. Text Part (텍스트 설명)
+- AI 아바타와 함께 말풍선에 표시
+- 예: "러닝화 카테고리를 선택하셨군요. 어떤 실루엣을 기본으로 시작할까요?"
 
-#### Search Bar
-- **위치**: 상단 고정
-- **패딩**: 16px
-- **입력창**: 
-  - 배경: White
-  - 아이콘: Search icon (Gray-400)
-  - Placeholder: "Search chats..."
+#### B. Selection Widget (선택지)
+- AI 말풍선 **바로 아래**에 부착된(Attached) 형태로 렌더링
+- **Grid Card Widget**: (Outline, Sole 선택용)
+    - 이미지 카드 그리드 (2-3열)
+    - 각 카드는 [이미지] + [라벨]로 구성
+    - 클릭 시 즉시 선택
+- **Chip Group Widget**: (Target, Category, Material 선택용)
+    - 둥근 칩 형태의 버튼 나열
+    - 단일 선택(Radio) 또는 다중 선택(Checkbox)
+- **Color Picker Widget**:
+    - 컬러 팔레트 원형 버튼
 
-#### New Chat Button
-- **위치**: Search Bar 아래
-- **마진**: 좌우 16px, 하단 16px
-- **스타일**: Primary Button (Full width)
-- **아이콘**: Plus icon + "New Chat"
+### 3.2 User Message
+- 사용자가 위젯에서 선택을 마치면, **선택한 내용이 사용자의 말풍선으로 변환**되어 스트림에 추가됩니다.
+- 예: (사용자가 'Running' 카드 클릭) -> 사용자 말풍선: "Running" 또는 "러닝화 스타일로 할래" 생성
+- **효과**: 대화가 끊기지 않고 자연스럽게 이어지는 느낌 제공
 
-#### Session List
-- **영역**: 나머지 높이 (overflow-y: auto)
-- **Session Item**:
-  - 패딩: 12px 16px
-  - 호버: Gray-100 배경
-  - 활성 상태: Primary-50 배경 + Primary-500 왼쪽 보더(3px)
-  - **내용**:
-    - 제목: text-sm, font-medium, Gray-800
-    - 미리보기: text-xs, Gray-500, 말줄임 (truncate)
-    - 시간: text-xs, Gray-400 (우측 상단)
-  - **컨텍스트 메뉴** (우클릭/호버): 이름 변경, 삭제
+### 3.3 Input Area
+- **Step 0 (진입)**: 활성화. "어떤 신발을 만들고 싶으신가요?" (자유 입력)
+- **Selection Steps**: 
+    - 기본적으로 **비활성화(Disabled)** 또는 **숨김**.
+    - 혹은 "직접 입력하기" 모드로 전환 시, AI가 자유 텍스트를 분석해 선택지로 매핑(구현 난이도 높음, MVP 제외 권장).
 
 ---
 
-### 3.2 Chat Area
+## 4. 단계별 인터랙션 시나리오
 
-#### 레이아웃
-- **위치**: 오른쪽 메인
-- **너비**: `calc(100% - 320px)`
-- **배경**: White
-- **구조**: Flex-col
+### 4.1 Step 0: Initial Intent
+- **AI**: "안녕하세요! 오늘은 어떤 디자인을 해볼까요?" (추천 프롬프트 칩 포함)
+- **User**: "빨간색 가벼운 러닝화 만들어줘" (텍스트 입력)
+- **System**: 텍스트 분석 후 Step 1 건너뛰고 Step 2로 갈 수도 있음 (Smart Jump)
 
-#### Message List
-- **영역**: `flex-1` (스크롤 가능)
-- **패딩**: 24px (좌우 최대 800px 중앙 정렬)
-- **System Message**:
-  - 스타일: 중앙 정렬, text-xs, Gray-400, 배지 형태
-- **User Message**:
-  - 정렬: 오른쪽
-  - 말풍선: Primary-500 배경, White 텍스트
-  - 보더 반경: rounded-2xl (rounded-tr-sm)
-  - 최대 너비: 70%
-- **AI Message**:
-  - 정렬: 왼쪽
-  - 아바타: Mercury Logo Icon
-  - 말풍선: Gray-100 배경, Gray-800 텍스트
-  - 보더 반경: rounded-2xl (rounded-tl-sm)
-  - **Generated Images**:
-    - 메시지 하단에 그리드(2x2 또는 1x1)로 표시
-    - 둥근 모서리 (rounded-lg)
-    - 클릭 시 이미지 뷰어 모달 오픈
-    - 액션 버튼: "Vary", "Upscale", "Edit in Canvas"
-  - **Initial Briefing Bubble**:
-    - [REQ-007](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/requirements/req-007-design-brief.md)에 따른 디자인 브리프 입력 폼.
-    - AI가 첫 추론 후 메시지 내에 포함하여 출력.
-    - **Summary View** (기본) -> **Edit Mode** (확장) -> **Locked** (확정 후).
-    - 상세 UI: [ui-spec-design-brief.md](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/design-fe/ui-spec-design-brief.md) 참조.
+### 4.2 Step 2: Outline Selection
+- **AI**: 
+    - 텍스트: "빨간색 러닝화 좋네요. 기본이 될 아웃라인을 골라주세요."
+    - **Widget**: [Outline A 이미지] [Outline B 이미지] [Outline C 이미지]
+- **User**: [Outline A] 클릭
+- **System**:
+    - 위젯 상태: [Outline A]가 Highlight 되고 나머지는 Dimmed 처리 (Read-only 모드로 변경)
+    - **New Message**: 사용자 쪽에 "아웃라인 A로 할게" 말풍선 추가
+    - **New AI Message**: "좋습니다. 이제 바닥창(Sole)을 골라볼까요?" + Sole 선택 위젯 표시
 
-#### Input Container
-- **위치**: Message List 하단, Image History 상단
-- **패딩**: 16px 24px
-- **최대 너비**: 900px (중앙 정렬)
-- **배경**: White (Gradient overlay at top for scroll fade)
-- **Input Box**:
-  - 배경: White
-  - 보더: 1.5px solid Gray-300 (Focus: Primary-500)
-  - 반경: rounded-xl
-  - 그림자: shadow-sm
-  - **구성**:
-    - 왼쪽: 파일 업로드 버튼 (Paperclip icon)
-    - 중앙: Textarea (Auto-resize, max 5 rows)
-    - 오른쪽: Send 버튼 (ArrowUp icon, Primary color circle)
-
-#### Image History Slider
-- **위치**: 최하단 고정
-- **높이**: 120px
-- **배경**: Gray-50
-- **보더**: 상단 1px solid Gray-200
-- **패딩**: 10px 0
-- **아이템**:
-  - 크기: 100x100px
-  - 마진: 좌우 8px
-  - 스타일: rounded-lg, cover fit
-  - 호버: scale(1.05), shadow-md
-  - 툴팁: 프롬프트 정보 표시
-  - 드래그 앤 드롭: Input Box로 드래그 시 레퍼런스로 추가
+### 4.3 Step 5: Generation Result
+- **AI**:
+    - 텍스트: "모든 선택이 완료되었습니다. 디자인을 생성합니다..."
+    - **Widget**: [Generating Loader...] -> [Completed Image]
+- **Interaction**:
+    - 이미지 클릭 시 Lightbox 확대
+    - 하단에 [Regenerate] [Finalize] 버튼 위젯 표시
 
 ---
 
-## 4. 상태 & 인터랙션
+## 5. 예외 상황 처리
 
-### 4.1 로딩 상태 (Typing Indicator)
-- AI 메시지 버블 내 `Thinking...` 또는 3-dot animation
-- 이미지 생성 중:
-  - 플레이스홀더: 스켈레톤 UI + 진행률 표시줄 (Progress Bar)
-  - 멘트: "Generating 4 deviations..."
+### 5.1 수정 (Edit/Undo)
+- 사용자가 과거 AI 메시지의 위젯(예: 아웃라인 선택)을 다시 클릭하여 변경하면?
+- **정책**: 
+    1. 현재 진행 중인 대화 아래에 "System Info: 사용자가 아웃라인을 변경했습니다." 표시
+    2. 변경된 아웃라인을 기준으로 이후 단계(Sole, Color 등)는 **무효화(Reset)**됨을 알림
+    3. 대화 흐름이 해당 지점부터 다시 시작되거나, 빠르게 재설정하는 위젯이 하단에 새로 생김
 
-### 4.2 Empty State (New Session)
-- 중앙 배치
-- 로고 + 환영 메시지 ("What shoe design are you dreaming of today?")
-- 추천 프롬프트 칩 (Chips):
-  - "Futuristic running shoes with neon lights"
-  - "Vintage leather boots, 90s style"
-  - "Minimalist white sneakers"
-
-### 4.3 이미지 인터랙션
-- **클릭**: Lightbox 모달 (확대 보기)
-- **우클릭/메뉴**: 
-  - Download
-  - Send to Canvas (새 프로젝트 생성)
-  - Remix (프롬프트 복사 후 수정)
+### 5.2 세션 복원
+- 기존 세션에 들어오면 마지막 대화 상태 그대로 로드
+- 마지막 단계의 위젯이 활성화 상태로 표시됨
 
 ---
 
-## 5. 애니메이션 (Framer Motion)
+## 0. Visual Reference
+![Chat Interface v3 Prototype](C:/Users/tjwn1/.gemini/antigravity/brain/d2ba919c-7352-4e78-a18b-8c022c2138db/chat_interface_v3_rich_chat_1769428778812.png)
+## 6. Visual Style Guide
 
-### 5.1 메시지 진입
-```jsx
-const messageVariants = {
-  initial: { opacity: 0, y: 10, scale: 0.95 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  transition: { duration: 0.2 }
-};
-```
+### 6.1 Colors
+- **AI Bubble**: Gray-100 (text-gray-900)
+- **User Bubble**: Primary-600 (text-white)
+- **Active Widget Item**: Ring-2 Ring-Primary-500 Bg-Primary-50
+- **Disabled/Past Widget**: Opacity-60 Grayscale (선택된 항목만 진하게)
 
-### 5.2 이미지 생성 효과
-- **Fade In**: 이미지가 로드될 때 부드럽게 나타남
-- **Shimmer**: 로딩 중 스켈레톤 효과
-
-### 5.3 사이드바 토글 (옵션, 모바일 대응)
-- **AnimatePresence** 사용
-- `x: -320` -> `x: 0`
+### 6.2 Animation
+- **Message In**: Slide Up + Fade In (Tension: 200, Friction: 20)
+- **Widget Expand**: AI 텍스트가 먼저 나오고 0.3초 뒤 위젯이 부드럽게 펼쳐짐
 
 ---
-
-## 6. 구현 예시
-
-### 6.1 ChatLayout Component
-```jsx
-<div className="flex h-[calc(100vh-64px)] overflow-hidden">
-  <SessionListPanel />
-  <div className="flex flex-col flex-1 relative">
-    <MessageList className="flex-1 overflow-y-auto" />
-    <InputContainer className="shrink-0" />
-    <ImageHistorySlider className="shrink-0 h-[120px]" />
-  </div>
-</div>
-```
-
----
-
-## 7. 참고 문서
-- [Design System](file:///c:/Users/tjwn1/Desktop/mercury_v2_proto/docs/design/design-system.md)

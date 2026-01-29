@@ -9,7 +9,7 @@ from app.main import app
 from app.deps.db import get_db
 
 # Test database URL
-TEST_DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/mercury_v2_test"
+TEST_DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5433/mercury_v2_test"
 
 
 @pytest_asyncio.fixture(scope="function")
