@@ -13,11 +13,10 @@ def setup_middleware(app: FastAPI):
     logger = logging.getLogger(__name__)
     logger.info(f"🌐 CORS Origins: {settings.CORS_ORIGINS}")
     
-    # CORS - 개발 환경에서는 모든 localhost 포트 허용
+    # CORS - 개발 환경에서는 모든 origin 허용
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
-        allow_origin_regex=r"http://localhost:\d+",  # 모든 localhost 포트 허용
+        allow_origins=["*"],  # 개발 환경: 모든 origin 허용
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

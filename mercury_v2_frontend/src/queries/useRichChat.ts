@@ -2,7 +2,7 @@ import type { Message, ChatSession } from '@/types/richChat';
 import { api } from '@/utils/api';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/v1$/, '') || 'http://localhost:8000';
 
 export const useRichChatSessions = () => {
     return useQuery({
@@ -59,7 +59,7 @@ export const useStreamRichMessage = () => {
     try {
       const token = localStorage.getItem('accessToken'); 
       
-      const response = await fetch(`${BASE_URL}/chat/sessions/${sessionId}/message`, {
+      const response = await fetch(`${BASE_URL}/api/v1/chat/sessions/${sessionId}/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

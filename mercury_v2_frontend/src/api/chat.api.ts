@@ -81,7 +81,8 @@ export const chatApi = {
     const { streamSSE } = await import('../utils/sse.utils');
     const token = localStorage.getItem('accessToken');
     
-    const url = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'}/chat/sessions/${sessionId}/messages/stream`;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/v1$/, '') || 'http://localhost:8000';
+    const url = `${baseUrl}/api/v1/chat/sessions/${sessionId}/messages/stream`;
     
     await streamSSE(
       url,
